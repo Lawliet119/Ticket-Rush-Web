@@ -34,7 +34,7 @@ const findUserByResetToken = async (token) => {
         where: {
             password_reset_token: token,
             password_reset_expires: {
-                gt: new Date() // Phải còn hạn
+                gt: new Date() /
             }
         }
     })
@@ -45,7 +45,7 @@ const updatePassword = async (userId, newPasswordHash) => {
         where: { id: userId },
         data: {
             password_hash: newPasswordHash,
-            password_reset_token: null, // Xóa token sau khi dùng
+            password_reset_token: null, 
             password_reset_expires: null
         }
     })

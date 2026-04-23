@@ -6,8 +6,7 @@ class AccessController {
     
   logIn = async (req, res, next) => {
     const result = await AccessService.logIn(req.body);
-    
-    // Set HttpOnly Cookie
+
     res.cookie('refreshToken', result.tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -15,7 +14,7 @@ class AccessController {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
-    // Remove refreshToken from the body sent to frontend
+  
     delete result.tokens.refreshToken;
 
     new OK({
