@@ -3,16 +3,22 @@ const express = require('express')
 const { default: helmet } = require('helmet')
 const morgan = require('morgan')
 const cors = require('cors')
+const cookieParser = require('cookie-parser')
 const app = express()
 const dotenv = require("dotenv").config()
 const PORT = process.env.PORT || 3000
 
 // 1. Init middlewares
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173', // Địa chỉ Frontend của bạn (Vite mặc định là 5173)
+    credentials: true
+}))
+app.use(cookieParser())
 app.use(compression())
 app.use(helmet())
 app.use(morgan('dev'))
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 // 2. Init routes
 app.use('',require('./src/routes'))

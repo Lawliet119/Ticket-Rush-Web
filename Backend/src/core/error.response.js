@@ -32,7 +32,28 @@
         }
     }
 
+    class AuthFailureError extends ErrorResponse {
+        constructor(message = 'Unauthorized', statusCode = 401) {
+            super(message, statusCode)
+        }
+    }
+
+    class NotFoundError extends ErrorResponse {
+        constructor(message = 'Not Found', statusCode = 404) {
+            super(message, statusCode)
+        }
+    }
+
+    class ForbiddenError extends ErrorResponse {
+        constructor(message = 'Forbidden', statusCode = 403) {
+            super(message, statusCode)
+        }
+    }
+
     module.exports = {
         ConflictRequestError,
-        BadRequestError
+        BadRequestError,
+        AuthFailureError,
+        NotFoundError,
+        ForbiddenError
     }

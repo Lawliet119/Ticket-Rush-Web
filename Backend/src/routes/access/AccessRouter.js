@@ -5,6 +5,16 @@ const AccessController = require('../../controllers/Access.controller')
 const router = express.Router()
 const asyncHandler = require('../../middleware/errorHandler')
 
-router.post('/signup',asyncHandler(AccessController.signUp))
+const { authentication } = require('../../utils/authUtils')
+
+router.post('/signup', asyncHandler(AccessController.signUp))
+router.post('/login', asyncHandler(AccessController.logIn))
+router.post('/forgot-password', asyncHandler(AccessController.forgotPassword))
+router.post('/reset-password/:token', asyncHandler(AccessController.resetPassword))
+
+// Authentication required
+router.use(asyncHandler(authentication))
+
+router.post('/logout', asyncHandler(AccessController.logout))
 
 module.exports = router

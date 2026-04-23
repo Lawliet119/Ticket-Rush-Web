@@ -1,0 +1,41 @@
+@url_dev=http://localhost:3000/v1/api
+@accessToken=ACCESS_TOKEN_CUA_BAN_SAU_KHI_LOGIN
+@clientId=CLIENT_ID_CUA_BAN_SAU_KHI_LOGIN
+
+### 1. Tạo Sự kiện mới (Kèm Sơ đồ ghế)
+POST {{url_dev}}/event/create
+Content-Type: application/json
+authorization: {{accessToken}}
+x-client-id: {{clientId}}
+
+{
+    "title": "Chiller Night - Concert 2026",
+    "description": "Đêm nhạc thư giãn cùng các nghệ sĩ Indie",
+    "venue": "Nhà thi đấu Quân khu 7",
+    "address": "Phổ Quang, Tân Bình, TP.HCM",
+    "event_date": "2026-12-20T19:00:00Z",
+    "sale_start_at": "2026-11-01T09:00:00Z",
+    "sale_end_at": "2026-12-19T23:59:59Z",
+    "zones": [
+        {
+            "name": "VIP",
+            "rows": 5,
+            "seats_per_row": 10,
+            "price": 2000000,
+            "color_hex": "#FFD700"
+        },
+        {
+            "name": "Standard A",
+            "rows": 10,
+            "seats_per_row": 15,
+            "price": 800000,
+            "color_hex": "#C0C0C0"
+        }
+    ]
+}
+
+### 2. Lấy danh sách sự kiện
+GET {{url_dev}}/event?page=1&limit=10
+
+### 3. Lấy chi tiết sự kiện (Thay ID vào)
+GET {{url_dev}}/event/ID_SU_KIEN_CUA_BAN

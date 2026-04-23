@@ -3,7 +3,7 @@ POST {{url_dev}}/signup
 Content-Type: application/json
 
 {
-    "name": "John Ooe",
-    "email": "[gfhdsffdad@gf]",
-    "password": "password"
+    "name": "huydev",
+    "email": "huyasuo157810@gmai.com",
+    "password": "pas123ord"
 }
