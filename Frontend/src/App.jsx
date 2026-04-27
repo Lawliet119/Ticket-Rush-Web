@@ -1,36 +1,62 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
-import SignUp from './pages/SignUp';
+import ProtectedRoute from './components/ProtectedRoute';
+
+import CustomerLayout from './components/CustomerLayout';
+import AdminLayout from './components/AdminLayout';
+
 import Login from './pages/Login';
+import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
+import Home from './pages/Home'; 
 import CreateEvent from './pages/CreateEvent';
-import Home from './pages/Home';
+
+// Import các trang mới tạo
+import MyTicketsPage from './pages/MyTicketsPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import ManageEventsPage from './pages/admin/ManageEventsPage';
 
 function App() {
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          {/* Điều hướng trang chủ mặc định vào home */}
-          <Route path="/" element={<Navigate to="/home" />} />
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" />} />
 
-          {/* public routes */}
-          <Route path="/home" element={<Home />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+        {/* --- CUSTOMER ROUTES --- */}
+        <Route path="/login" element={<CustomerLayout><Login /></CustomerLayout>} />
+        <Route path="/signup" element={<CustomerLayout><SignUp /></CustomerLayout>} />
+        <Route path="/forgot-password" element={<CustomerLayout><ForgotPassword /></CustomerLayout>} />
+        <Route path="/home" element={<CustomerLayout><Home /></CustomerLayout>} />
+        
+        <Route path="/my-tickets" element={
+          <ProtectedRoute>
+            <CustomerLayout><MyTicketsPage /></CustomerLayout>
+          </ProtectedRoute>
+        } />
 
-          {/* protected routes */}
-          <Route path="/create-event" element={<CreateEvent />} />
+        {/* --- ADMIN ROUTES --- */}
+        <Route path="/admin/dashboard" element={
+          <ProtectedRoute requireAdmin={true}>
+            <AdminLayout><AdminDashboard /></AdminLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/events" element={
+          <ProtectedRoute requireAdmin={true}>
+            <AdminLayout><ManageEventsPage /></AdminLayout>
+          </ProtectedRoute>
+        } />
 
-          {/* 404 route */}
-          <Route path="*" element={<div style={{ padding: '20px' }}>404 - Not found</div>} />
-        </Routes>
-      </Layout>
+        {/* Đưa CreateEvent vào AdminLayout */}
+        <Route path="/create-event" element={
+          <ProtectedRoute requireAdmin={true}>
+            <AdminLayout><CreateEvent /></AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="*" element={<div className="p-20 text-center text-2xl font-bold">404 - Not found</div>} />
+      </Routes>
     </BrowserRouter>
   );
-
-
 }
 
 export default App;

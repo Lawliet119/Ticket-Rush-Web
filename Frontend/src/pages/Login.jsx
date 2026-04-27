@@ -23,8 +23,8 @@ export default function Login() {
 
       localStorage.setItem('accessToken', data.metadata.tokens.accessToken) 
       localStorage.setItem('userId', data.metadata.user.id) 
+      localStorage.setItem('role', data.metadata.user.role)
       
-
       navigate('/home') 
     } catch (err) {
       setError(err?.response?.data?.message || err?.message || 'Đăng nhập thất bại')

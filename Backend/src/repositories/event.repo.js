@@ -25,6 +25,8 @@ class EventRepository {
                 }
             })
 
+            let totalSeatsCount = 0;
+
             // 2. Create Zones and their Seats
             if (zones && zones.length > 0) {
                 for (const zone of zones) {
@@ -58,8 +60,19 @@ class EventRepository {
                     await tx.seats.createMany({
                         data: seatsData
                     })
+
+                    totalSeatsCount += (zone.rows * zone.seats_per_row);
                 }
             }
+
+            // Update the event with the total seats count
+            await tx.events.update({
+                where: { id: newEvent.id },
+                data: { 
+                    total_seats: totalSeatsCount,
+                    available_seats: totalSeatsCount
+                 }
+            })
 
             return newEvent
         })
