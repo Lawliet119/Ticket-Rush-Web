@@ -14,12 +14,14 @@ import CreateEvent from './pages/CreateEvent';
 import MyTicketsPage from './pages/MyTicketsPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageEventsPage from './pages/admin/ManageEventsPage';
+import EventDetail from './pages/EventDetail';
+import Checkout from './pages/Checkout';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="/" element={<Navigate to="/my-tickets" />} />
 
         {/* --- CUSTOMER ROUTES --- */}
         <Route path="/login" element={<CustomerLayout><Login /></CustomerLayout>} />
@@ -27,10 +29,13 @@ function App() {
         <Route path="/forgot-password" element={<CustomerLayout><ForgotPassword /></CustomerLayout>} />
         <Route path="/home" element={<CustomerLayout><Home /></CustomerLayout>} />
         
+        <Route path="/events/:id" element={<CustomerLayout><EventDetail /></CustomerLayout>} />
+        <Route path="/checkout" element={<CustomerLayout><Checkout /></CustomerLayout>} />
+
         <Route path="/my-tickets" element={
-          <ProtectedRoute>
+          
             <CustomerLayout><MyTicketsPage /></CustomerLayout>
-          </ProtectedRoute>
+          
         } />
 
         {/* --- ADMIN ROUTES --- */}
