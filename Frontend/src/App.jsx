@@ -9,6 +9,7 @@ import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home'; 
 import CreateEvent from './pages/CreateEvent';
+import ResetPassword from './pages/ResetPassword';
 
 // Import các trang mới tạo
 import MyTicketsPage from './pages/MyTicketsPage';
@@ -25,6 +26,7 @@ function App() {
         <Route path="/login" element={<CustomerLayout><Login /></CustomerLayout>} />
         <Route path="/signup" element={<CustomerLayout><SignUp /></CustomerLayout>} />
         <Route path="/forgot-password" element={<CustomerLayout><ForgotPassword /></CustomerLayout>} />
+        <Route path="/reset-password/:token" element={<CustomerLayout><ResetPassword /></CustomerLayout>} />
         <Route path="/home" element={<CustomerLayout><Home /></CustomerLayout>} />
         
         <Route path="/my-tickets" element={

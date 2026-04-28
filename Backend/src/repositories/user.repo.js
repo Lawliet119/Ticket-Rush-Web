@@ -34,7 +34,7 @@ const findUserByResetToken = async (token) => {
         where: {
             password_reset_token: token,
             password_reset_expires: {
-                gt: new Date() 
+                gt: new Date()
             }
         }
     })
