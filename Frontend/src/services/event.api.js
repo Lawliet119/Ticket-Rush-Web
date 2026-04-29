@@ -1,12 +1,16 @@
 import http from '../lib/http'
 
 export const createEventApi = async (payload) => {
-  const res = await http.post('/event/create', payload) 
+  // Check if payload is FormData
+  const isFormData = payload instanceof FormData;
+  const config = isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+  
+  const res = await http.post('/event/create', payload, config) 
   return res.data
 }
 
-export const getAllEventsApi = async () => {
-  const res = await http.get('/event') 
+export const getAllEventsApi = async (params = {}) => {
+  const res = await http.get('/event', { params })
   return res.data
 }
 

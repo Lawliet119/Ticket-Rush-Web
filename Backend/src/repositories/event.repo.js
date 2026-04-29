@@ -6,7 +6,7 @@ class EventRepository {
     
     static createEvent = async ({ 
         title, description, venue, address, event_date, 
-        event_end_date, sale_start_at, sale_end_at, created_by, zones 
+        event_end_date, sale_start_at, sale_end_at, created_by, zones, banner_url 
     }) => {
         return await prisma.$transaction(async (tx) => {
             // 1. Create Event
@@ -21,7 +21,8 @@ class EventRepository {
                     sale_start_at: new Date(sale_start_at),
                     sale_end_at: new Date(sale_end_at),
                     created_by,
-                    status: 'DRAFT'
+                    status: 'DRAFT',
+                    banner_url: banner_url || null
                 }
             })
 

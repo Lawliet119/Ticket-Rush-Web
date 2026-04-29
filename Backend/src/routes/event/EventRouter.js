@@ -5,6 +5,7 @@ const EventController = require('../../controllers/Event.controller')
 const router = express.Router()
 const { authentication, checkRole } = require('../../utils/authUtils')
 const asyncHandler = require('../../middleware/errorHandler')
+const upload = require('../../middleware/uploadHandler')
 
 // Public routes
 router.get('', asyncHandler(EventController.getAllEvents))
@@ -14,6 +15,6 @@ router.get('/:id', asyncHandler(EventController.getEventDetail))
 router.use(authentication)
 
 // Admin routes
-router.post('/create', checkRole(['ADMIN']), asyncHandler(EventController.createEvent))
+router.post('/create', checkRole(['ADMIN']), upload.single('banner'), asyncHandler(EventController.createEvent))
 
 module.exports = router

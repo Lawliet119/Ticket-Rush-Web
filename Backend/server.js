@@ -15,10 +15,15 @@ app.use(cors({
 }))
 app.use(cookieParser())
 app.use(compression())
-app.use(helmet())
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}))
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+// 1.5 Serve static files
+app.use(express.static('public'))
 
 // 2. Init routes
 app.use('',require('./src/routes'))

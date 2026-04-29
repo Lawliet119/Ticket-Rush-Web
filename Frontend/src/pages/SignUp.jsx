@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { signupApi } from '../services/auth.api'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function SignUp() {
   // Form state
@@ -10,8 +10,8 @@ export default function SignUp() {
     password: ''
   })
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const navigate = useNavigate()
 
   const onChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -20,13 +20,15 @@ export default function SignUp() {
   const onSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    setMessage('')
     setError('')
 
     try {
       const data = await signupApi(form)
-      setMessage(data?.message || 'Đăng ký thành công!')
-      setForm({ name: '', email: '', password: '' })
+      // Lưu token vào localStorage và chuyển hướng về /home
+      localStorage.setItem('accessToken', data.metadata.tokens.accessToken)
+      localStorage.setItem('userId', data.metadata.user.id)
+      localStorage.setItem('role', data.metadata.user.role)
+      navigate('/home')
     } catch (err) {
       setError(
         err?.response?.data?.message ||
@@ -77,7 +79,6 @@ export default function SignUp() {
         </p>
       </form>
 
-      {message && <div className="mt-4 p-3 bg-green-50 text-green-700 border border-green-200 rounded-lg">{message}</div>}
       {error && <div className="mt-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg">{error}</div>}
     </div>
   )
