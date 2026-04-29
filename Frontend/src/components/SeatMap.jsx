@@ -3,13 +3,7 @@ import { Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 
-const ZONES = [
-  { id: 'VIP', name: 'VIP', price: 2500000, rows: 5, seatsPerRow: 10, color: 'bg-amber-400' },
-  { id: 'ZONE_A', name: 'Zone A', price: 1500000, rows: 8, seatsPerRow: 15, color: 'bg-blue-400' },
-  { id: 'ZONE_B', name: 'Zone B', price: 800000, rows: 10, seatsPerRow: 18, color: 'bg-emerald-400' },
-];
-
-export default function SeatMap() {
+export default function SeatMap({ eventData }) {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [timeLeft, setTimeLeft] = useState(600);
   const [realtimeLockedSeats, setRealtimeLockedSeats] = useState([]); // Chứa các ghế BỊ NGƯỜI KHÁC CHỌN
@@ -25,18 +19,20 @@ export default function SeatMap() {
 
   // ĐỘNG CƠ REAL-TIME SOCKET.IO
   useEffect(() => {
-    // Kết nối tới Mini Server
-    const newSocket = io('http://127.0.0.1:4000', {
-  transports: ['websocket']
-  });
+     // 1. Lấy URL Backend từ biến môi trường một cách an toàn
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/v1/api';
+    const backendUrl = apiUrl.replace('/v1/api', ''); // Cắt đuôi API để lấy gốc Server
+
+    // const newSocket = io(backendUrl, { transports: ['websocket'] });
+    const newSocket = io('http://localhost:3000', { transports: ['websocket'] });
     setSocket(newSocket);
 
-    // 1. Nhận danh sách ghế đang bị khóa ngay khi mới vào
+    // 2. Khi kết nối thành công, đồng bộ danh sách ghế đang bị khóa từ Server
     newSocket.on('sync_seats', (lockedList) => {
       setRealtimeLockedSeats(lockedList);
     });
 
-    // 2. Lắng nghe mỗi khi có ai đó bấm chọn/nhả ghế
+    // 3. Lắng nghe mỗi khi có ai đó bấm chọn/nhả ghế
     newSocket.on('seat_updated', (seatId, isLocking) => {
       setRealtimeLockedSeats(prev => {
         if (isLocking) return [...prev, seatId]; // Thêm vào danh sách khóa
@@ -54,31 +50,29 @@ export default function SeatMap() {
     return `${m}:${s}`;
   };
 
-  const getStatus = (seatId) => {
-    // Nếu ghế nằm trong danh sách đang bị người khác giữ -> Trả về LOCKED
-    if (realtimeLockedSeats.includes(seatId)) return 'LOCKED';
+   if (!eventData || !eventData.zones || eventData.zones.length === 0) {
+    return <div className="py-20 text-center text-xl font-bold text-gray-500">Sự kiện này chưa được cấu hình sơ đồ ghế!</div>;
+  }
 
-    // Mock logic cũ cho vài ghế thành SOLD
-    const hash = seatId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    if (hash % 15 === 0) return 'SOLD';
-    
-    return 'AVAILABLE';
-  };
+  // Khi người dùng click vào ghế
+  const handleSeatClick = (seat, zoneInfo) => {
+    const lockedArray = Array.isArray(realtimeLockedSeats) ? realtimeLockedSeats : [];
 
-  const handleSeatClick = (seat) => {
-    if (seat.status === 'SOLD' || seat.status === 'LOCKED') return; // Không cho click nếu đã Sold hoặc bị người khác Lock
+    if (seat.status === 'SOLD' || lockedArray.includes(seat.id)) return; // Không cho click nếu đã Sold hoặc bị người khác Lock
 
     setSelectedSeats(prev => {
       const isSelected = prev.find(s => s.id === seat.id);
       
       if (isSelected) {
-        // ĐANG CHỌN MÀ BẤM LẠI -> NHẢ GHẾ (Báo cho Server là false)
-        if (socket) socket.emit('toggle_seat', seat.id, false);
+        if (socket && socket.connected) socket.emit('toggle_seat', seat.id, false);
         return prev.filter(s => s.id !== seat.id);
       } else {
-        // CHƯA CHỌN MÀ BẤM VÀO -> XÍ GHẾ (Báo cho Server là true)
-        if (socket) socket.emit('toggle_seat', seat.id, true);
-        return [...prev, seat];
+        if (socket && socket.connected) socket.emit('toggle_seat', seat.id, true);
+        return [...prev, { 
+          id: seat.id, 
+          label: `${zoneInfo.name} - Ghế ${seat.label}`, 
+          price: Number(zoneInfo.price) 
+        }];
       }
     });
   };
@@ -94,52 +88,65 @@ export default function SeatMap() {
           STAGE
         </div>
 
-        {ZONES.map(zone => (
-          <div key={zone.id} className="mb-14 min-w-fit">
-            <div className="flex items-center gap-3 mb-6">
-              <div className={`w-4 h-4 rounded ${zone.color}`}></div>
-              <h3 className="text-xl font-bold text-gray-800">{zone.name}</h3>
-              <span className="text-gray-400 font-medium">{zone.price.toLocaleString('vi-VN')} đ</span>
-            </div>
+        {/* LẶP QUA DỮ LIỆU THẬT: eventData.zones thay vì ZONES */}
+        {eventData.zones.map(zone => {
+          const rowsArray = Array.from({ length: zone.rows }, (_, i) => i + 1);
 
-            <div className="flex flex-col gap-3">
-              {[...Array(zone.rows)].map((_, rowIndex) => {
-                const rowNum = rowIndex + 1;
-                return (
-                  <div key={rowNum} className="flex items-center gap-4">
-                    <span className="w-6 text-sm font-bold text-gray-400 text-center">{rowNum}</span>
-                    <div className="flex gap-2">
-                      {[...Array(zone.seatsPerRow)].map((_, seatIndex) => {
-                        const seatNum = seatIndex + 1;
-                        const seatId = `${zone.id}-${rowNum}-${seatNum}`;
-                        const status = getStatus(seatId); // Lấy trạng thái real-time
-                        const isSelected = selectedSeats.some(s => s.id === seatId);
+          return (
+            <div key={zone.id} className="mb-14 min-w-fit">
+              <div className="flex items-center gap-3 mb-6">
+                {/* Dùng màu thật từ DB */}
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: zone.color_hex }}></div>
+                <h3 className="text-xl font-bold text-gray-800">{zone.name}</h3>
+                <span className="text-gray-400 font-medium">{Number(zone.price).toLocaleString('vi-VN')} đ</span>
+              </div>
 
-                        let bgClass = zone.color;
-                        let cursor = 'cursor-pointer hover:scale-110';
+              <div className="flex flex-col gap-3">
+                {rowsArray.map(rowNum => {
+                  // Lọc ra ghế của từng hàng từ Backend trả về
+                  const seatsInThisRow = zone.seats?.filter(s => s.row_number === rowNum) || [];
 
-                        // Đổ màu theo trạng thái
-                        if (status === 'SOLD') { bgClass = 'bg-gray-300'; cursor = 'cursor-not-allowed'; }
-                        else if (status === 'LOCKED') { bgClass = 'bg-orange-400'; cursor = 'cursor-not-allowed'; }
-                        else if (isSelected) { bgClass = 'bg-violet-600 shadow-md ring-2 ring-violet-300 scale-110'; }
+                  return (
+                    <div key={rowNum} className="flex items-center gap-4">
+                      <span className="w-6 text-sm font-bold text-gray-400 text-center">{rowNum}</span>
+                      
+                      {/* CSS Grid dàn ghế */}
+                      <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${zone.seats_per_row}, minmax(0, 1fr))` }}>
+                        {seatsInThisRow.map(seat => {
+                          const isSelected = selectedSeats.some(s => s.id === seat.id);
+                          const isLocked = realtimeLockedSeats.includes(seat.id);
+                          
+                          let bgStyle = { backgroundColor: zone.color_hex }; 
+                          let cursorClass = 'cursor-pointer hover:scale-110 hover:brightness-90';
 
-                        return (
-                          <button
-                            key={seatId}
-                            onClick={() => handleSeatClick({ id: seatId, price: zone.price, label: `${zone.name} - Row ${rowNum} Seat ${seatNum}`, status })}
-                            className={`w-8 h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center text-[10px] md:text-xs font-bold transition-all duration-200 ${bgClass} ${cursor} ${isSelected || status !== 'AVAILABLE' ? 'text-white' : 'text-gray-800/60'}`}
-                          >
-                            {seatNum}
-                          </button>
-                        );
-                      })}
+                          if (seat.status === 'SOLD') {
+                            bgStyle = { backgroundColor: '#D1D5DB' }; cursorClass = 'cursor-not-allowed';
+                          } else if (isLocked) {
+                            bgStyle = { backgroundColor: '#FB923C' }; cursorClass = 'cursor-not-allowed';
+                          } else if (isSelected) {
+                            bgStyle = { backgroundColor: '#7C3AED' }; cursorClass = 'shadow-md ring-2 ring-violet-300 scale-110';
+                          }
+
+                          return (
+                            <button
+                              key={seat.id}
+                              onClick={() => handleSeatClick(seat, zone)}
+                              style={bgStyle}
+                              title={seat.label}
+                              className={`w-8 h-8 md:w-9 md:h-9 rounded-md flex items-center justify-center text-[10px] md:text-xs font-bold transition-all duration-200 text-white ${cursorClass}`}
+                            >
+                              {seat.seat_number}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         <div className="mt-10 flex flex-wrap gap-8 py-6 border-t border-gray-100">
           <div className="flex items-center gap-2"><div className="w-5 h-5 bg-gray-100 border border-gray-200 rounded"></div><span className="text-sm font-bold text-gray-600">Available</span></div>

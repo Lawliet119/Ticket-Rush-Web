@@ -22,7 +22,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/my-tickets" />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
 
         {/* --- CUSTOMER ROUTES --- */}
         <Route path="/login" element={<CustomerLayout><Login /></CustomerLayout>} />

@@ -15,6 +15,7 @@ router.post('/reset-password/:token', asyncHandler(AccessController.resetPasswor
 // Authentication required
 router.use(asyncHandler(authentication))
 
+router.get('/me', asyncHandler(AccessController.getMe))
 router.post('/logout', asyncHandler(AccessController.logout))
 
 module.exports = router

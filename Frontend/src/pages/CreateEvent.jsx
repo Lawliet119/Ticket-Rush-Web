@@ -89,6 +89,65 @@ export default function CreateEvent() {
     setLoading(true);
     setError('');
 
+    // ==========================================
+    // VALIDATION LIST
+    // ==========================================
+    if (!form.title.trim() || !form.venue.trim()) {
+      setError('Tên sự kiện và địa điểm không được để trống!');
+      setLoading(false); return;
+    }
+
+    const now = new Date();
+    const eventDate = new Date(form.event_date);
+    const saleStart = new Date(form.sale_start_at);
+    const saleEnd = new Date(form.sale_end_at);
+
+    if (saleStart < now) {
+      setError('Thời gian mở bán vé không được ở trong quá khứ!');
+      setLoading(false); return;
+    }
+    if (saleStart >= saleEnd) {
+      setError('Thời gian kết thúc bán vé phải SAU thời gian mở bán!');
+      setLoading(false); return;
+    }
+    if (saleStart >= eventDate) {
+      setError('Phải mở bán vé TRƯỚC khi sự kiện diễn ra!');
+      setLoading(false); return;
+    }
+
+    if (zones.length === 0) {
+      setError('Phải có ít nhất 1 khu vực ghế!');
+      setLoading(false); return;
+    }
+
+    const zoneNames = new Set();
+    for (let i = 0; i < zones.length; i++) {
+      const z = zones[i];
+      const zName = z.name.trim();
+
+      if (!zName) {
+        setError(`Tên khu vực ở hàng thứ ${i + 1} không được để trống!`);
+        setLoading(false); return;
+      }
+      if (Number(z.rows) <= 0 || Number(z.seats_per_row) <= 0) {
+        setError(`Khu vực "${zName}" phải có ít nhất 1 hàng và 1 ghế!`);
+        setLoading(false); return;
+      }
+      if (Number(z.price) < 0) {
+        setError(`Giá vé khu vực "${zName}" không được âm!`);
+        setLoading(false); return;
+      }
+      if (zoneNames.has(zName.toLowerCase())) {
+        setError(`Tên khu vực "${zName}" bị trùng lặp!`);
+        setLoading(false); return;
+      }
+      zoneNames.add(zName.toLowerCase());
+    }
+
+    // ==========================================
+    // END OF VALIDATION
+    // ==========================================
+
     try {
       // Create FormData to send file and JSON data together
       const formData = new FormData();

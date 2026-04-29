@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { signupApi } from '../services/auth.api'
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function SignUp() {
+  const { fetchUser } = useAuth();
   // Form state
   const [form, setForm] = useState({
     name: '',
@@ -27,7 +29,8 @@ export default function SignUp() {
       // Lưu token vào localStorage và chuyển hướng về /home
       localStorage.setItem('accessToken', data.metadata.tokens.accessToken)
       localStorage.setItem('userId', data.metadata.user.id)
-      localStorage.setItem('role', data.metadata.user.role)
+      
+      await fetchUser();
       navigate('/home')
     } catch (err) {
       setError(

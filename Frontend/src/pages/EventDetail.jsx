@@ -1,70 +1,100 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { getEventDetailApi } from '../services/event.api';
 import SeatMap from '../components/SeatMap';
 
 export default function EventDetail() {
+  // 1. Lấy ID từ URL
+  const { id } = useParams(); 
+  
+  const [eventData, setEventData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // 2. Gọi API lấy dữ liệu thật
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const res = await getEventDetailApi(id);
+        setEventData(res.metadata);
+      } catch (err) {
+        setError('Không thể tải thông tin sự kiện! (Có thể ID không tồn tại)');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDetail();
+  }, [id]);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl font-bold text-gray-500">Đang tải dữ liệu sơ đồ rạp...</div>;
+  if (error || !eventData) return <div className="min-h-screen flex items-center justify-center text-red-500 text-xl font-bold">{error}</div>;
+
+  const occupancyRate = eventData.total_seats > 0 
+    ? (((eventData.total_seats - eventData.available_seats) / eventData.total_seats) * 100).toFixed(0) 
+    : 0;
+
   return (
     <div className="min-h-screen bg-white">
       {/* Nút Back */}
       <div className="max-w-7xl mx-auto px-6 py-4">
-        <Link to="/home" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors w-fit">
+        <Link to="/home" className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors w-fit">
           <ArrowLeft size={20} />
-          <span className="font-medium">Back to Events</span>
+          <span className="font-medium">Quay lại danh sách</span>
         </Link>
       </div>
 
-      {/* Phần Header Sự Kiện */}
+      {/* Header Sự Kiện - LẤY DATA THẬT */}
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
-        {/* Banner */}
-        <div className="relative aspect-video rounded-3xl overflow-hidden shadow-lg">
+        <div className="relative aspect-video rounded-3xl overflow-hidden shadow-lg bg-gray-100">
           <img 
-            src="https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=2070&auto=format&fit=crop" 
-            alt="Event Banner"
+            src={eventData.banner_url || 'https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=2070&auto=format&fit=crop'} 
+            alt={eventData.title}
             className="w-full h-full object-cover"
           />
         </div>
 
-        {/* Thông tin sự kiện */}
         <div className="flex flex-col justify-center">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Summer Beats Festival 2026</h1>
-          <p className="text-xl text-gray-500 mb-6 font-medium">Various Artists</p>
-          
-          <p className="text-gray-600 leading-relaxed mb-8">
-            Experience the biggest music festival of the summer featuring top artists from around the world. 
-            Don't miss out on this unforgettable night of rhythm and energy.
+          <h1 className="text-4xl font-extrabold text-gray-900 mb-2">{eventData.title}</h1>
+          <p className="text-gray-600 leading-relaxed mb-8 mt-2">
+            {eventData.description || 'Chưa có mô tả chi tiết cho sự kiện này.'}
           </p>
 
           <div className="space-y-4">
             <div className="flex items-center gap-3 text-gray-700">
               <Calendar size={20} className="text-gray-400" />
-              <span className="font-medium">15/7/2026 • 18:00</span>
+              <span className="font-medium">{new Date(eventData.event_date).toLocaleString('vi-VN')}</span>
             </div>
             <div className="flex items-center gap-3 text-gray-700">
               <MapPin size={20} className="text-gray-400" />
-              <span className="font-medium">National Stadium, Hanoi, Vietnam</span>
+              <span className="font-medium">{eventData.venue} {eventData.address && `- ${eventData.address}`}</span>
             </div>
             <div className="flex items-center gap-3 text-gray-700">
               <Users size={20} className="text-gray-400" />
-              <span className="font-medium">287 / 450 seats available</span>
+              <span className="font-medium">{eventData.available_seats} / {eventData.total_seats} chỗ trống</span>
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="mt-8">
-            <div className="flex justify-between text-sm font-bold text-gray-900 mb-2">
-              <span>Seat occupancy</span>
-              <span>36%</span>
+          {eventData.total_seats > 0 && (
+            <div className="mt-8">
+              <div className="flex justify-between text-sm font-bold text-gray-900 mb-2">
+                <span>Tỷ lệ lấp đầy rạp</span>
+                <span>{occupancyRate}%</span>
+              </div>
+              <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                <div 
+                  className="bg-purple-600 h-full rounded-full transition-all duration-1000" 
+                  style={{ width: `${occupancyRate}%` }}
+                ></div>
+              </div>
             </div>
-            <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
-              <div className="bg-gray-900 h-full rounded-full transition-all duration-500" style={{ width: '36%' }}></div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Phần Sơ đồ ghế */}
+      {/* 3. TRUYỀN DATA THẬT XUỐNG CHO SEAT MAP */}
       <div className="bg-gray-50 py-16 border-t border-gray-100">
-        <SeatMap />
+        <SeatMap eventData={eventData} />
       </div>
     </div>
   );

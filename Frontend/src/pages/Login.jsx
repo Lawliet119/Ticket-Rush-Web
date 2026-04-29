@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { loginApi } from '../services/auth.api' 
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
+  const { fetchUser } = useAuth(); 
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -23,8 +25,8 @@ export default function Login() {
 
       localStorage.setItem('accessToken', data.metadata.tokens.accessToken) 
       localStorage.setItem('userId', data.metadata.user.id) 
-      localStorage.setItem('role', data.metadata.user.role)
       
+      await fetchUser();
       navigate('/home') 
     } catch (err) {
       setError(err?.response?.data?.message || err?.message || 'Đăng nhập thất bại')
