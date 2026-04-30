@@ -23,11 +23,13 @@ export default function Home() {
 
   return (
     <div className="pb-16">
-      <div className="relative bg-gray-900 h-[450px] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+      <div className="relative bg-indigo-950 h-[450px] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
         <div 
-          className="absolute inset-0 opacity-40 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1533174000220-9fa6d6484d5f?auto=format&fit=crop&q=80')" }}
+          className="absolute inset-0 opacity-50 bg-cover bg-center mix-blend-overlay"
+          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=1920&q=80')" }}
         ></div>
+        {/* Lớp gradient overlay để text dễ đọc hơn */}
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
         
         <div className="relative z-10 w-full max-w-2xl mt-8">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 tracking-tight drop-shadow-md">TicketRush</h1>
