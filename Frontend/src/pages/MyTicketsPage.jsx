@@ -1,49 +1,63 @@
-import { useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Calendar, MapPin, Download, Eye } from 'lucide-react';
+import { getMyTicketsApi } from '../services/booking.api';
 
 export default function MyTicketsPage() {
-  // 1. HỨNG DỮ LIỆU TỪ CHECKOUT
-  const location = useLocation();
-  const newBooking = location.state; // Sẽ chứa { selectedSeats, totalPrice }
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // 2. CHẾ BIẾN DỮ LIỆU TRƯỚC KHI ĐƯA VÀO GIAO DIỆN
-  // Nếu có vé mới thì format lại tên ghế (VD: "VIP - Row 1 Seat 2, Zone A - Row 3 Seat 1")
-  const formattedSeats = newBooking 
-    ? newBooking.selectedSeats.map(s => s.label).join(', ')
-    : 'VIP Row 2 Seat 5, VIP Row 2 Seat 6'; // Dữ liệu phòng hờ
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const data = await getMyTicketsApi();
+        // data.metadata is array of tickets
+        const formattedTickets = data.metadata.map(ticket => {
+          const event = ticket.orders?.events || {};
+          const item = ticket.order_items || {};
+          
+          return {
+            id: ticket.ticket_code,
+            eventTitle: event.title || 'Unknown Event',
+            image: event.banner_url || 'https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=2070&auto=format&fit=crop',
+            date: event.event_date ? new Date(event.event_date).toLocaleDateString('vi-VN') : '',
+            time: event.event_date ? new Date(event.event_date).toLocaleTimeString('vi-VN') : '',
+            venue: event.venue || 'Unknown Venue',
+            address: event.address || '',
+            seats: `${item.zone_name} - ${item.seat_label}`,
+            totalPaid: `${Number(item.price).toLocaleString('vi-VN')} đ`,
+            status: ticket.status,
+            qrData: ticket.qr_data
+          };
+        });
+        setTickets(formattedTickets);
+      } catch (err) {
+        console.error('Error fetching tickets:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Nếu có vé mới thì lấy tổng tiền mới
-  const formattedPrice = newBooking 
-    ? `${newBooking.totalPrice.toLocaleString('vi-VN')} đ`
-    : '5.000.000 đ'; // Dữ liệu phòng hờ
+    fetchTickets();
+  }, []);
 
-  // Dữ liệu vé để vẽ giao diện
-  const MY_TICKETS = [
-    {
-      id: `TKT-${Math.floor(Math.random() * 1000000)}-2026`, // Random mã vé cho xịn
-      eventTitle: 'Summer Beats Festival 2026',
-      image: 'https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=2070&auto=format&fit=crop',
-      date: '15/7/2026',
-      time: '18:00',
-      venue: 'National Stadium',
-      address: 'Hanoi, Vietnam',
-      seats: formattedSeats,   // <--- Truyền danh sách ghế đã xử lý vào đây
-      totalPaid: formattedPrice, // <--- Truyền giá tiền đã xử lý vào đây
-      status: 'Confirmed'
-    }
-  ];
+  if (loading) return <div className="min-h-screen py-12 text-center">Loading tickets...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-5xl mx-auto px-6">
         <h1 className="text-3xl font-black text-gray-900 mb-10">My Tickets</h1>
 
-        <div className="space-y-8">
-          {MY_TICKETS.map((ticket) => (
-            <div key={ticket.id} className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row">
+        {tickets.length === 0 ? (
+          <div className="text-center text-gray-500 py-10 bg-white rounded-2xl shadow-sm">
+            You haven't purchased any tickets yet.
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {tickets.map((ticket) => (
+              <div key={ticket.id} className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row">
               
-              {/* Ảnh sự kiện */}
+              {/* Event Image */}
               <div className="w-full md:w-1/3 h-64 md:h-auto relative">
                 <img src={ticket.image} alt={ticket.eventTitle} className="w-full h-full object-cover" />
                 <div className="absolute top-4 right-4 bg-emerald-100 text-emerald-600 px-4 py-1.5 rounded-full text-xs font-bold border border-emerald-200">
@@ -51,7 +65,7 @@ export default function MyTicketsPage() {
                 </div>
               </div>
 
-              {/* Thông tin vé */}
+              {/* Ticket Info */}
               <div className="flex-1 p-8 flex flex-col md:flex-row gap-8">
                 <div className="flex-1">
                   <h2 className="text-2xl font-black text-gray-900 mb-1">{ticket.eventTitle}</h2>
@@ -92,7 +106,7 @@ export default function MyTicketsPage() {
                 <div className="w-full md:w-48 flex flex-col items-center justify-center bg-gray-50 rounded-3xl p-6 border border-gray-100">
                   <div className="bg-white p-3 rounded-2xl shadow-inner mb-4">
                     <QRCodeCanvas 
-                      value={ticket.id} 
+                      value={ticket.qrData} 
                       size={120}
                       level={"H"}
                       includeMargin={false}
@@ -105,8 +119,9 @@ export default function MyTicketsPage() {
               </div>
 
             </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

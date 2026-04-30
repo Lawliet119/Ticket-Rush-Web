@@ -16,5 +16,7 @@ router.use(authentication)
 
 // Admin routes
 router.post('/create', checkRole(['ADMIN']), upload.single('banner'), asyncHandler(EventController.createEvent))
+router.put('/update/:id', checkRole(['ADMIN']), upload.single('banner'), asyncHandler(EventController.updateEvent))
+router.delete('/delete/:id', checkRole(['ADMIN']), asyncHandler(EventController.deleteEvent))
 
 module.exports = router

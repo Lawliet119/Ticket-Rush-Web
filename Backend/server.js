@@ -1,17 +1,18 @@
+require("dotenv").config()
 const compression = require('compression')
 const express = require('express')
 const { default: helmet } = require('helmet')
 const morgan = require('morgan')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
+const CronService = require('./src/services/cron.service')
 const app = express()
-const dotenv = require("dotenv").config()
 const PORT = process.env.PORT || 3000
 const { Server } = require('socket.io');
 
 // 1. Init middlewares
 app.use(cors({
-    origin: 'http://localhost:5173', // Địa chỉ Frontend của bạn (Vite mặc định là 5173)
+    origin: 'http://localhost:5173', // Frontend address (Vite default is 5173)
     credentials: true
 }))
 app.use(cookieParser())
@@ -51,13 +52,17 @@ const server = app.listen(PORT, () => {
 // 3.5 Init Socket.IO
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:5173', // Cho phép Frontend gọi tới
+        origin: 'http://localhost:5173', // Allow Frontend access
         methods: ["GET", "POST"],
         credentials: true
     }
 });
-// Gọi file xử lý logic Socket
+global._io = io;
+// Load socket logic
 require('./src/sockets/seatSocket')(io);
+
+// Init Cron Jobs after io is ready
+CronService.init(io);
 
 // 4. Handle exit
 process.on('SIGINT', () => {

@@ -43,6 +43,28 @@ class EventController {
             metadata: await EventService.getEventDetail(req.params.id)
         }).send(res)
     }
+
+    updateEvent = async (req, res, next) => {
+        const payload = req.body;
+        
+        // Handle uploaded file if present
+        if (req.file) {
+            payload.banner_url = req.file.path;
+        }
+
+        new OK({
+            message: 'Event updated successfully!',
+            metadata: await EventService.updateEvent(req.params.id, payload)
+        }).send(res)
+    }
+
+    deleteEvent = async (req, res, next) => {
+        await EventService.deleteEvent(req.params.id)
+        new OK({
+            message: 'Event deleted successfully!',
+            metadata: {}
+        }).send(res)
+    }
 }
 
 module.exports = new EventController()

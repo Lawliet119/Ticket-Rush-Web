@@ -33,6 +33,38 @@ class EventService {
         if (!event) throw new BadRequestError('Event not found')
         return event
     }
+
+    static updateEvent = async (eventId, payload) => {
+        // Basic check if event exists
+        const existingEvent = await EventRepository.findEventById(eventId)
+        if (!existingEvent) throw new BadRequestError('Event not found')
+
+        // Additional validation if needed
+        if (payload.event_date && payload.sale_start_at) {
+            if (new Date(payload.sale_start_at) >= new Date(payload.event_date)) {
+                throw new BadRequestError('Sale start date must be before event date')
+            }
+        }
+
+        // We should avoid updating zones/seats directly through this simple update
+        // for safety, remove zones from payload if it exists
+        const updateData = { ...payload }
+        delete updateData.zones
+
+        return await EventRepository.updateEvent(eventId, updateData)
+    }
+
+    static deleteEvent = async (eventId) => {
+        const existingEvent = await EventRepository.findEventById(eventId)
+        if (!existingEvent) throw new BadRequestError('Event not found')
+        
+        try {
+            await EventRepository.deleteEvent(eventId)
+            return true
+        } catch (error) {
+            throw new BadRequestError('Cannot delete event. It may have existing orders.')
+        }
+    }
 }
 
 module.exports = EventService

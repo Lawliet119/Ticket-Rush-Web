@@ -2,15 +2,25 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { checkoutApi } from '../services/booking.api';
 
 export default function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
   
-  const { selectedSeats, totalPrice } = location.state || { selectedSeats: [], totalPrice: 0 };
+  const { selectedSeats, totalPrice, eventData, expiresAt } = location.state || { selectedSeats: [], totalPrice: 0, eventData: null, expiresAt: null };
+  
+  // Calculate remaining time based on expiresAt from Backend
+  const calculateInitialTime = () => {
+    if (!expiresAt) return 30; // Default 30s if no data
+    const remaining = Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000);
+    return remaining > 0 ? remaining : 0;
+  };
 
-  const [timeLeft, setTimeLeft] = useState(600);
-  const [isSuccess, setIsSuccess] = useState(false); // State kiểm soát màn hình thành công
+  const [timeLeft, setTimeLeft] = useState(calculateInitialTime());
+  const [isSuccess, setIsSuccess] = useState(false); // Success screen control state
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
 
   useEffect(() => {
     if (selectedSeats.length === 0) {
@@ -18,14 +28,14 @@ export default function Checkout() {
       return;
     }
 
-    // Nếu thanh toán thành công rồi thì dừng đồng hồ
+    // Stop timer if payment is successful
     if (isSuccess) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          alert('Phiên giao dịch hết hạn! Vui lòng chọn lại ghế.');
+          alert('Transaction session expired! Please select seats again.');
           navigate('/home');
           return 0;
         }
@@ -42,12 +52,28 @@ export default function Checkout() {
     return `${m}:${s}`;
   };
 
-  const handleConfirmPayment = (e) => {
+  const handleConfirmPayment = async (e) => {
     e.preventDefault();
-    setIsSuccess(true); // Bật cờ thành công thay vì chuyển trang luôn
+    if (!eventData || selectedSeats.length === 0) return;
+
+    setIsProcessing(true);
+    setCheckoutError('');
+
+    try {
+      const payload = {
+        eventId: eventData.id,
+        seatIds: selectedSeats.map(s => s.id)
+      };
+      await checkoutApi(payload);
+      setIsSuccess(true);
+    } catch (err) {
+      setCheckoutError(err?.response?.data?.message || 'Payment failed.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  // MÀN HÌNH 2: NẾU THANH TOÁN THÀNH CÔNG -> HIỆN UI NÀY
+  // SCREEN 2: PAYMENT SUCCESSFUL UI
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
@@ -81,7 +107,7 @@ export default function Checkout() {
           </div>
 
           <button 
-            onClick={() => navigate('/my-tickets', { state: { selectedSeats, totalPrice } })}
+            onClick={() => navigate('/my-tickets', { state: { selectedSeats, totalPrice, eventData } })}
             className="w-full bg-violet-600 hover:bg-violet-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-violet-200 transition-all active:scale-95 flex items-center justify-center gap-2"
           >
             View My Tickets <ArrowRight size={20} />
@@ -91,14 +117,14 @@ export default function Checkout() {
     );
   }
 
-  // MÀN HÌNH 1: GIAO DIỆN THANH TOÁN
+  // SCREEN 1: CHECKOUT UI
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-6xl mx-auto px-6">
         <h1 className="text-3xl font-extrabold text-gray-900 mb-8">Checkout</h1>
         <div className="flex flex-col lg:flex-row gap-8">
           
-          {/* CỘT TRÁI: FORM ĐIỀN THÔNG TIN */}
+          {/* LEFT COLUMN: INFORMATION FORM */}
           <div className="flex-1 space-y-6">
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h2>
@@ -155,9 +181,11 @@ export default function Checkout() {
               </div>
 
               <div className="mb-6 pb-6 border-b border-gray-100">
-                <p className="font-bold text-gray-900">Summer Beats Festival 2026</p>
-                <p className="text-sm text-gray-500 mt-1">15/7/2026 • 18:00</p>
-                <p className="text-sm text-gray-500">National Stadium</p>
+                <p className="font-bold text-gray-900">{eventData?.title || 'Unknown Event'}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {eventData?.event_date ? new Date(eventData.event_date).toLocaleString('vi-VN') : ''}
+                </p>
+                <p className="text-sm text-gray-500">{eventData?.venue}</p>
               </div>
 
               <div className="space-y-4 mb-6">
@@ -176,11 +204,18 @@ export default function Checkout() {
                 <span className="text-2xl font-black text-violet-600">{totalPrice.toLocaleString('vi-VN')} đ</span>
               </div>
 
+              {checkoutError && (
+                <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 border border-red-100">
+                  {checkoutError}
+                </div>
+              )}
+
               <button 
                 onClick={handleConfirmPayment}
-                className="w-full bg-violet-600 hover:bg-violet-700 text-white font-black py-4 rounded-xl shadow-lg shadow-violet-200 transition-all active:scale-95"
+                disabled={isProcessing}
+                className="w-full bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white font-black py-4 rounded-xl shadow-lg shadow-violet-200 transition-all active:scale-95"
               >
-                Confirm Payment
+                {isProcessing ? 'Processing...' : 'Confirm Payment'}
               </button>
             </div>
           </div>

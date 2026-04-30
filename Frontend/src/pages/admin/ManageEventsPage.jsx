@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Calendar, MapPin, Users, Edit, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getAllEventsApi } from '../../services/event.api';
+import { getAllEventsApi, deleteEventApi } from '../../services/event.api';
 
 export default function ManageEventsPage() {
   const [events, setEvents] = useState([]);
@@ -22,6 +22,17 @@ export default function ManageEventsPage() {
     };
     fetchEvents();
   }, []);
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa sự kiện này không?')) return;
+    try {
+      await deleteEventApi(eventId);
+      setEvents(events.filter(e => e.id !== eventId));
+      alert('Xóa sự kiện thành công!');
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Không thể xóa sự kiện.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -98,8 +109,8 @@ export default function ManageEventsPage() {
                         </span>
                       </div>
                       <div className="flex gap-2">
-                        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-md transition"><Edit className="w-4 h-4" /></button>
-                        <button className="p-2 text-red-500 hover:bg-red-50 rounded-md transition"><Trash2 className="w-4 h-4" /></button>
+                        <Link to={`/admin/edit-event/${event.id}`} className="p-2 text-gray-500 hover:bg-gray-100 rounded-md transition"><Edit className="w-4 h-4" /></Link>
+                        <button onClick={() => handleDeleteEvent(event.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-md transition"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
 

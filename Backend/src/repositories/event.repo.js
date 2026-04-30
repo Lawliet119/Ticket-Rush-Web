@@ -108,6 +108,19 @@ class EventRepository {
             }
         })
     }
+
+    static updateEvent = async (id, payload) => {
+        return await prisma.events.update({
+            where: { id },
+            data: payload
+        })
+    }
+
+    static deleteEvent = async (id) => {
+        return await prisma.events.delete({
+            where: { id }
+        })
+    }
 }
 
 module.exports = EventRepository

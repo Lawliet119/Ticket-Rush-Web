@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, CalendarDays, MapPin } from 'lucide-react';
 import { getAllEventsApi } from '../services/event.api';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
   const [events, setEvents] = useState([]);

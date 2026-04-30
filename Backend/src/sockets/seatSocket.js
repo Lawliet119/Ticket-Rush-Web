@@ -5,7 +5,7 @@ const lockedSeats = new Set();
 
 module.exports = (io) => {
     io.on('connection', (socket) => {
-        console.log(`[Socket] Khách hàng kết nối: ${socket.id}`);
+        console.log(`[Socket] Client connected: ${socket.id}`);
 
         // 1. Send locked seats list when a new client connects
         socket.emit('sync_seats', Array.from(lockedSeats));
@@ -24,7 +24,7 @@ module.exports = (io) => {
         });
 
         socket.on('disconnect', () => {
-            console.log(`[Socket] Khách hàng ngắt kết nối: ${socket.id}`);
+            console.log(`[Socket] Client disconnected: ${socket.id}`);
         });
     });
 };

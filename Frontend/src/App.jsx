@@ -15,6 +15,7 @@ import ResetPassword from './pages/ResetPassword';
 import MyTicketsPage from './pages/MyTicketsPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageEventsPage from './pages/admin/ManageEventsPage';
+import EditEvent from './pages/admin/EditEvent';
 import EventDetail from './pages/EventDetail';
 import Checkout from './pages/Checkout';
 
@@ -57,6 +58,12 @@ function App() {
         <Route path="/create-event" element={
           <ProtectedRoute requireAdmin={true}>
             <AdminLayout><CreateEvent /></AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/edit-event/:id" element={
+          <ProtectedRoute requireAdmin={true}>
+            <AdminLayout><EditEvent /></AdminLayout>
           </ProtectedRoute>
         } />
 
