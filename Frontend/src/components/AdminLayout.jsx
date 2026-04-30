@@ -1,16 +1,19 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Ticket, User, LogOut, ArrowLeftRight } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AdminLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const role = localStorage.getItem('role');
+  
+  const { user } = useAuth();
+  const role = user?.role;
 
   const isActive = (path) => location.pathname === path ? "text-purple-600 font-semibold" : "text-gray-600 hover:text-purple-600";
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login'); 
+    window.location.href = '/login';
   };
 
   return (

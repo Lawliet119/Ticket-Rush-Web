@@ -97,8 +97,11 @@ class EventRepository {
             include: {
                 zones: {
                     include: {
-                        _count: {
-                            select: { seats: true }
+                        seats: {
+                            orderBy: [
+                                { row_number: 'asc' },
+                                { seat_number: 'asc' }
+                            ]
                         }
                     }
                 }

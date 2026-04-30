@@ -1,17 +1,19 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Ticket, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function CustomerLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const accessToken = localStorage.getItem('accessToken');
-  const role = localStorage.getItem('role');
+
+  const { user } = useAuth();
+  const role = user?.role;
 
   const isActive = (path) => location.pathname === path ? "text-purple-600 font-semibold" : "text-gray-600 hover:text-purple-600";
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login'); 
+    window.location.href = '/login';
   };
 
   return (
@@ -28,7 +30,7 @@ export default function CustomerLayout({ children }) {
           <nav className="flex items-center gap-6 text-sm font-medium">
             <Link to="/home" className={`transition ${isActive('/home')}`}>Events</Link>
             
-            {accessToken ? (
+            {user ? (
               <>
                 <Link to="/my-tickets" className={`transition ${isActive('/my-tickets')}`}>My Tickets</Link>
                 

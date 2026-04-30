@@ -22,6 +22,11 @@ export const resetPasswordApi = async (token, payload) => {
 }
 
 // Sneeds Authentication
+export const getMeApi = async () => {
+  const res = await http.get('/me')
+  return res.data
+}
+
 export const logoutApi = async () => {
   const res = await http.post('/logout')
   return res.data

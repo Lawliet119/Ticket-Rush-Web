@@ -3,6 +3,18 @@ const AccessService = require('../services/access.service')
 const { OK, CREATED } = require('../core/success.response')
 
 class AccessController {
+
+  getMe = async (req, res, next) => {
+    new OK({
+      message: 'Get current user success',
+      metadata: {
+        id: req.user.id,
+        email: req.user.email,
+        role: req.user.role,
+        full_name: req.user.full_name
+      }
+    }).send(res)
+  }
     
   logIn = async (req, res, next) => {
     const result = await AccessService.logIn(req.body);

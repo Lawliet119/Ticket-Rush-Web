@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Search, CalendarDays, MapPin } from 'lucide-react';
 import { getAllEventsApi } from '../services/event.api';
+import { useNavigate } from 'react-router-dom'; 
 
 export default function Home() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -58,7 +60,11 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map(event => (
-              <div key={event.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col cursor-pointer group">
+              <div 
+                key={event.id} 
+                onClick={() => navigate(`/events/${event.id}`)} 
+                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col cursor-pointer group"
+              >
                 
                 <div className="relative h-52 bg-gray-200 overflow-hidden">
                   <img 
