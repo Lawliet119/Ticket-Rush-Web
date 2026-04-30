@@ -31,3 +31,8 @@ export const deleteEventApi = async (eventId) => {
   const res = await http.delete(`/event/delete/${eventId}`)
   return res.data
 }
+
+export const getDashboardStatsApi = async () => {
+  const res = await http.get('/dashboard/stats');
+  return res.data;
+}

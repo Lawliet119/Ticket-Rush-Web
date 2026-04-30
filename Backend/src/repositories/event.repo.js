@@ -21,7 +21,7 @@ class EventRepository {
                     sale_start_at: new Date(sale_start_at),
                     sale_end_at: new Date(sale_end_at),
                     created_by,
-                    status: 'DRAFT',
+                    status: 'ON_SALE',
                     banner_url: banner_url || null
                 }
             })
