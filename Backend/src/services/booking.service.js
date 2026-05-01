@@ -41,6 +41,10 @@ class BookingService {
                 seatIds.forEach(id => {
                     global._io.emit('seat_sold_realtime', id);
                 });
+
+                
+                  global._io.emit('dashboard_stats_updated');
+        
             }
 
             return result;
@@ -53,5 +57,6 @@ class BookingService {
         return await BookingRepository.getMyTickets(userId);
     }
 }
+
 
 module.exports = BookingService

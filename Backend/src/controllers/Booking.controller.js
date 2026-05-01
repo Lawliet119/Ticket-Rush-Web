@@ -23,10 +23,6 @@ class BookingController {
 
         const result = await BookingService.checkout({ userId, eventId, seatIds });
 
-        if (global._io) {
-            global._io.emit('dashboard_stats_updated');
-        }
-
         new OK({
             message: 'Payment successful. Tickets have been created.',
             metadata: result
