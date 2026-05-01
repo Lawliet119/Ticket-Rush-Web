@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, CalendarDays, MapPin } from 'lucide-react';
+import { Search, CalendarDays, MapPin, ChevronLeft, ChevronRight, CheckCircle2, ShoppingCart, Ticket as TicketIcon } from 'lucide-react';
 import { getAllEventsApi } from '../services/event.api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -26,44 +26,69 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="pb-24 bg-gradient-to-b from-[#f8fafc] to-white relative overflow-hidden">
-      <div className="relative bg-indigo-950 h-[450px] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+    <div className="pb-24 bg-[#f4f4f4] relative overflow-hidden">
+      {/* --- HERO SECTION --- */}
+      <div className="relative h-[600px] flex flex-col items-center justify-center text-center px-4 overflow-hidden group">
         <div 
-          className="absolute inset-0 opacity-50 bg-cover bg-center mix-blend-overlay"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=1920&q=80')" }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/concert_hero.png')" }}
         ></div>
-        {/* Lớp gradient overlay để text dễ đọc hơn */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/40"></div>
         
-        <div className="relative z-10 w-full max-w-2xl mt-8">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 tracking-tight drop-shadow-md">TicketRush</h1>
-          <p className="text-xl text-gray-200 mb-10 font-medium drop-shadow-md">Your favorite events, one click away.</p>
+        {/* Navigation Arrows (Visual only) */}
+        <button className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition opacity-0 group-hover:opacity-100 hidden md:block">
+          <ChevronLeft className="w-12 h-12" />
+        </button>
+        <button className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition opacity-0 group-hover:opacity-100 hidden md:block">
+          <ChevronRight className="w-12 h-12" />
+        </button>
+
+        <div className="relative z-10 w-full max-w-4xl mt-12">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-widest uppercase drop-shadow-lg">
+            Selling<br/>Concert Tickets
+          </h1>
+          <p className="text-sm md:text-base text-gray-200 mb-10 font-medium max-w-2xl mx-auto drop-shadow-md px-4">
+            Post-ironic authentic drinking vinegar chambray quinoa VHS letterpress sriracha, tacos skateboard migas farm-to-table artisan kombucha.
+          </p>
           
-          <div className="bg-white rounded-full p-2 flex items-center shadow-2xl mx-auto max-w-xl">
-            <input 
-              type="text" 
-              placeholder="Search events, venues..." 
-              className="flex-grow px-4 py-2 bg-transparent outline-none text-gray-700 placeholder-gray-400"
-            />
-            <button className="bg-violet-600 hover:bg-violet-700 p-3 rounded-full text-white transition-colors">
-              <Search className="w-5 h-5" />
-            </button>
+          <button className="bg-white hover:bg-gray-100 text-black px-8 py-3 font-bold text-sm tracking-wider uppercase transition-colors shadow-lg">
+            Read More
+          </button>
+        </div>
+      </div>
+
+      {/* --- FEATURES BAR --- */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto max-w-5xl px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
+            <div className="flex flex-col items-center pt-4 md:pt-0">
+              <CheckCircle2 className="w-8 h-8 text-[#6bda63] mb-4" />
+              <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wide mb-1">Choose Events and Tickets</h3>
+              <p className="text-gray-400 text-xs">with only a few clicks</p>
+            </div>
+            <div className="flex flex-col items-center pt-4 md:pt-0">
+              <ShoppingCart className="w-8 h-8 text-[#6bda63] mb-4" />
+              <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wide mb-1">Buy Directly from Organizers</h3>
+              <p className="text-gray-400 text-xs">Pay online or cash on delivery</p>
+            </div>
+            <div className="flex flex-col items-center pt-4 md:pt-0">
+              <TicketIcon className="w-8 h-8 text-[#6bda63] mb-4" />
+              <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wide mb-1">Receive Tickets</h3>
+              <p className="text-gray-400 text-xs">via email or right at your door</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 mt-20 z-10">
-        {/* Decorative background blobs */}
-        <div className="absolute top-10 right-0 w-[500px] h-[500px] bg-purple-300/20 rounded-full blur-3xl pointer-events-none -z-10 mix-blend-multiply"></div>
-        <div className="absolute top-60 left-[-100px] w-[400px] h-[400px] bg-blue-300/20 rounded-full blur-3xl pointer-events-none -z-10 mix-blend-multiply"></div>
+      <div id="upcoming-events" className="relative max-w-5xl mx-auto px-4 mt-16 z-10">
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-          <div>
-            <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight relative inline-block">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-gray-200 pb-4 gap-4">
+          <div className="flex items-center gap-3">
+            <CalendarDays className="w-6 h-6 text-gray-400" />
+            <h2 className="text-2xl font-bold text-gray-800 tracking-tight">
               Upcoming Events
-              <div className="absolute -bottom-3 left-0 w-1/2 h-1.5 bg-gradient-to-r from-purple-600 to-indigo-500 rounded-full"></div>
             </h2>
-            <p className="text-gray-500 mt-4 text-lg">Khám phá những sự kiện nóng hổi nhất sắp diễn ra</p>
           </div>
         </div>
         
@@ -72,85 +97,55 @@ export default function Home() {
         ) : events.length === 0 ? (
           <div className="text-center text-gray-500 py-10">No events available at the moment.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {events.map(event => (
               <div 
                 key={event.id} 
                 onClick={() => {
                   if (!user) {
                     alert("Vui lòng đăng nhập để xem chi tiết và đặt vé sự kiện!");
-                    // navigate('/login'); // Có thể bật lên nếu muốn tự động chuyển hướng
                   } else {
                     navigate(`/events/${event.id}`);
                   }
                 }} 
-                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col cursor-pointer group"
+                className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col cursor-pointer group"
               >
                 
-                <div className="relative h-52 bg-gray-200 overflow-hidden">
+                <div className="relative h-[250px] bg-gray-200 overflow-hidden">
                   <img 
-                    // MAP DATA: Dùng banner_url từ DB
                     src={event.banner_url || 'https://images.unsplash.com/photo-1540039155732-68ee23e15b51?auto=format&fit=crop&q=80'} 
                     alt={event.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                   />
-                  <div className="absolute top-3 right-3 bg-white/95 backdrop-blur px-3 py-1.5 rounded-full text-xs font-bold text-gray-800 shadow-sm">
-                    {/* MAP DATA: Dùng available_seats từ DB */}
-                    {event.available_seats || 'N/A'} seats left
+                  {/* Venue overlay on image */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-3 flex items-center text-white text-xs font-medium">
+                    <MapPin className="w-3 h-3 mr-1.5" />
+                    <span className="truncate">{event.venue}</span>
                   </div>
                 </div>
 
-                <div className="p-6 flex flex-col flex-grow">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    {/* MAP DATA: Tên sự kiện */}
-                    <h3 className="text-xl font-bold text-gray-900 leading-tight">{event.title}</h3>
-                    
-                    {/* MAP DATA: Hiển thị trạng thái thay vì isPreview */}
-                    {event.status === 'ON_SALE' && (
-                      <span className="bg-green-600 text-white text-[10px] px-2 py-1 rounded uppercase font-bold tracking-wider whitespace-nowrap mt-1">On Sale</span>
-                    )}
-                  </div>
+                <div className="p-5 flex flex-col flex-grow border border-t-0 border-gray-100">
+                  <h3 className="text-base font-bold text-gray-800 leading-tight mb-2 truncate">{event.title}</h3>
                   
-                  {/* MAP DATA: dùng description làm fallback */}
-                  <p className="text-sm text-gray-600 mb-6 truncate">{event.description || 'Đang cập nhật thông tin...'}</p>
-                  
-                  <div className="space-y-3 mt-auto">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <CalendarDays className="w-4 h-4 mr-2 text-gray-400" />
-                      {/* MAP DATA: Format ngày event_date */}
-                      {new Date(event.event_date).toLocaleString('vi-VN')}
-                    </div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-400 shrink-0" />
-                      {/* MAP DATA: Địa điểm */}
-                      <span className="truncate">{event.venue}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-gray-100 flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Giá vé</span>
-                    <span className="text-lg font-extrabold text-violet-600">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-sm font-bold text-[#e67e22]">
                       {(() => {
-                        // 1. Nếu sự kiện chưa có cấu hình Zone nào
-                        if (!event.zones || event.zones.length === 0) {
-                          return "Đang cập nhật";
-                        }
-                        
-                        // 2. Lấy ra tất cả các mức giá từ mảng zones
-                        const prices = event.zones.map(zone => Number(zone.price));
-                        
-                        // 3. Tìm Min và Max
-                        const minPrice = Math.min(...prices);
-                        const maxPrice = Math.max(...prices);
-
-                        // 4. Nếu giá Min và Max bằng nhau (Ví dụ chỉ có 1 hạng vé)
-                        if (minPrice === maxPrice) {
-                          return `${minPrice.toLocaleString('vi-VN')} ₫`;
-                        }
-                        
-                        // 5. Nếu có nhiều hạng vé khác nhau -> Hiển thị Min - Max
-                        return `${minPrice.toLocaleString('vi-VN')} ₫ - ${maxPrice.toLocaleString('vi-VN')} ₫`;
+                        if (!event.zones || event.zones.length === 0) return "Đang cập nhật";
+                        const prices = event.zones.map(z => Number(z.price));
+                        const min = Math.min(...prices);
+                        const max = Math.max(...prices);
+                        if (min === max) return `${min.toLocaleString('vi-VN')} ₫`;
+                        return `${min.toLocaleString('vi-VN')} ₫ - ${max.toLocaleString('vi-VN')} ₫`;
                       })()}
+                    </span>
+                  </div>
+
+                  <div className="border-t border-gray-100 pt-3 flex justify-between items-center text-[10px] text-gray-400 uppercase font-semibold tracking-wider">
+                    <span className="flex items-center gap-1">
+                      <CalendarDays className="w-3 h-3" /> Charity
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <TicketIcon className="w-3 h-3" /> {event.available_seats}
                     </span>
                   </div>
                 </div>
