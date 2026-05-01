@@ -81,6 +81,14 @@ class BookingRepository {
                 data: { status: 'SOLD' }
             });
 
+            // Decrease available_seats for the event
+            await tx.events.update({
+                where: { id: eventId },
+                data: {
+                    available_seats: { decrement: seatIds.length }
+                }
+            });
+
             // 3. Create Order
             const order = await tx.orders.create({
                 data: {

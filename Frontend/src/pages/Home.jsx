@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { Search, CalendarDays, MapPin } from 'lucide-react';
 import { getAllEventsApi } from '../services/event.api';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Home() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -24,7 +26,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="pb-16">
+    <div className="pb-24 bg-gradient-to-b from-[#f8fafc] to-white relative overflow-hidden">
       <div className="relative bg-indigo-950 h-[450px] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
         <div 
           className="absolute inset-0 opacity-50 bg-cover bg-center mix-blend-overlay"
@@ -50,8 +52,20 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 mt-16">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8 tracking-tight">Upcoming Events</h2>
+      <div className="relative max-w-7xl mx-auto px-4 mt-20 z-10">
+        {/* Decorative background blobs */}
+        <div className="absolute top-10 right-0 w-[500px] h-[500px] bg-purple-300/20 rounded-full blur-3xl pointer-events-none -z-10 mix-blend-multiply"></div>
+        <div className="absolute top-60 left-[-100px] w-[400px] h-[400px] bg-blue-300/20 rounded-full blur-3xl pointer-events-none -z-10 mix-blend-multiply"></div>
+
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+          <div>
+            <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight relative inline-block">
+              Upcoming Events
+              <div className="absolute -bottom-3 left-0 w-1/2 h-1.5 bg-gradient-to-r from-purple-600 to-indigo-500 rounded-full"></div>
+            </h2>
+            <p className="text-gray-500 mt-4 text-lg">Khám phá những sự kiện nóng hổi nhất sắp diễn ra</p>
+          </div>
+        </div>
         
         {loading ? (
           <div className="text-center text-gray-500 py-10">Loading events...</div>
@@ -62,7 +76,14 @@ export default function Home() {
             {events.map(event => (
               <div 
                 key={event.id} 
-                onClick={() => navigate(`/events/${event.id}`)} 
+                onClick={() => {
+                  if (!user) {
+                    alert("Vui lòng đăng nhập để xem chi tiết và đặt vé sự kiện!");
+                    // navigate('/login'); // Có thể bật lên nếu muốn tự động chuyển hướng
+                  } else {
+                    navigate(`/events/${event.id}`);
+                  }
+                }} 
                 className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 flex flex-col cursor-pointer group"
               >
                 

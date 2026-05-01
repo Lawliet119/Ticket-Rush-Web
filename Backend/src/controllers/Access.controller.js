@@ -11,7 +11,8 @@ class AccessController {
         id: req.user.id,
         email: req.user.email,
         role: req.user.role,
-        full_name: req.user.full_name
+        full_name: req.user.full_name,
+        avatar_url: req.user.avatar_url
       }
     }).send(res)
   }

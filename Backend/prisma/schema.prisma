@@ -169,6 +169,7 @@ model users {
   full_name     String         @db.VarChar(150)
   date_of_birth DateTime?      @db.Date
   gender        gender?
+  age           Int?
   phone         String?        @db.VarChar(20)
   avatar_url    String?        @db.VarChar(500)
   is_active             Boolean        @default(true)

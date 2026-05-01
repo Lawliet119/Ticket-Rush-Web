@@ -46,8 +46,7 @@ class EventService {
             }
         }
 
-        // We should avoid updating zones/seats directly through this simple update
-        // for safety, remove zones from payload if it exists
+      
         const updateData = { ...payload }
         delete updateData.zones
 

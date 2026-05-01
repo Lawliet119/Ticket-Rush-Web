@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
 import { getEventDetailApi } from '../services/event.api';
 import SeatMap from '../components/SeatMap';
+import { io } from 'socket.io-client';
 
 export default function EventDetail() {
   // 1. Lấy ID từ URL
@@ -25,6 +26,15 @@ export default function EventDetail() {
       }
     };
     fetchDetail();
+
+    const socket = io('http://localhost:3000');
+    socket.on('dashboard_stats_updated', () => {
+      fetchDetail();
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [id]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-xl font-bold text-gray-500">Đang tải dữ liệu sơ đồ rạp...</div>;

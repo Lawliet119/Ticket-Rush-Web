@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, Ticket, DollarSign, Calendar } from 'lucide-react';
 import { getDashboardStatsApi } from '../../services/event.api'; 
+import { io } from 'socket.io-client'; 
 
 const COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'];
 
@@ -34,6 +35,15 @@ export default function AdminDashboard() {
       }
     };
     fetchDashboard();
+
+    const socket = io('http://localhost:3000');
+    socket.on('dashboard_stats_updated', () => {
+      fetchDashboard();
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-xl font-bold text-gray-500">Đang đồng bộ dữ liệu hệ thống...</div>;

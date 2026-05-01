@@ -13,6 +13,7 @@ import ResetPassword from './pages/ResetPassword';
 
 // Import các trang mới tạo
 import MyTicketsPage from './pages/MyTicketsPage';
+import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageEventsPage from './pages/admin/ManageEventsPage';
 import EditEvent from './pages/admin/EditEvent';
@@ -36,9 +37,15 @@ function App() {
         <Route path="/checkout" element={<CustomerLayout><Checkout /></CustomerLayout>} />
 
         <Route path="/my-tickets" element={
-          
+          <ProtectedRoute>
             <CustomerLayout><MyTicketsPage /></CustomerLayout>
-          
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <CustomerLayout><Profile /></CustomerLayout>
+          </ProtectedRoute>
         } />
 
         {/* --- ADMIN ROUTES --- */}

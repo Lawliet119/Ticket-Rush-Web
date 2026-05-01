@@ -92,7 +92,7 @@ class EventRepository {
     }
 
     static findEventById = async (id) => {
-        return await prisma.events.findUnique({
+        const event = await prisma.events.findUnique({
             where: { id },
             include: {
                 zones: {
@@ -106,7 +106,20 @@ class EventRepository {
                     }
                 }
             }
-        })
+        });
+
+        if (event && event.zones) {
+            let exactAvailableSeats = 0;
+            let exactTotalSeats = 0;
+            event.zones.forEach(zone => {
+                exactTotalSeats += zone.seats.length;
+                exactAvailableSeats += zone.seats.filter(s => s.status === 'AVAILABLE').length;
+            });
+            event.available_seats = exactAvailableSeats;
+            event.total_seats = exactTotalSeats;
+        }
+
+        return event;
     }
 
     static updateEvent = async (id, payload) => {
@@ -117,9 +130,27 @@ class EventRepository {
     }
 
     static deleteEvent = async (id) => {
-        return await prisma.events.delete({
-            where: { id }
-        })
+        return await prisma.$transaction(async (tx) => {
+            // Lấy danh sách các đơn hàng của sự kiện này
+            const orders = await tx.orders.findMany({ where: { event_id: id } });
+            
+            if (orders.length > 0) {
+                const orderIds = orders.map(o => o.id);
+                // Xóa tất cả vé liên quan đến các đơn hàng này
+                await tx.tickets.deleteMany({ where: { order_id: { in: orderIds } } });
+                
+                // Xóa tất cả order_items
+                await tx.order_items.deleteMany({ where: { order_id: { in: orderIds } } });
+                
+                // Xóa các đơn hàng
+                await tx.orders.deleteMany({ where: { event_id: id } });
+            }
+
+            // DB sẽ tự động cascade xóa zones, seats, vqs...
+            return await tx.events.delete({
+                where: { id }
+            });
+        });
     }
 }
 

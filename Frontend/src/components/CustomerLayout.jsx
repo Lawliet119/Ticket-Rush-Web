@@ -17,8 +17,8 @@ export default function CustomerLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans text-gray-900 selection:bg-purple-200 selection:text-purple-900">
+      <header className="bg-white/70 backdrop-blur-lg border-b border-white/20 sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.03)]">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/home" className="flex items-center gap-2 text-xl font-bold text-gray-900">
             <div className="bg-purple-100 p-1.5 rounded-lg">
@@ -42,9 +42,13 @@ export default function CustomerLayout({ children }) {
                 )}
 
                 <div className="pl-4 border-l border-gray-200 flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center">
-                    <User className="w-4 h-4" />
-                  </div>
+                  <Link to="/profile" className="w-9 h-9 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center overflow-hidden border border-purple-100 hover:ring-2 ring-purple-300 transition-all">
+                    {user?.avatar_url ? (
+                      <img src={user.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-4 h-4" />
+                    )}
+                  </Link>
                   <button onClick={handleLogout} className="text-red-500 hover:text-red-700 transition" title="Logout">
                     <LogOut className="w-4 h-4" />
                   </button>
