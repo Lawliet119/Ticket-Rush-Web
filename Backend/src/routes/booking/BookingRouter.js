@@ -9,9 +9,11 @@ const asyncHandler = require('../../middleware/errorHandler')
 // Authentication required for booking and viewing tickets
 router.use(authentication)
 
-router.post('/hold', asyncHandler(BookingController.holdSeats))
-router.post('/cancel-hold', asyncHandler(BookingController.cancelHold))
-router.post('/checkout', asyncHandler(BookingController.checkout))
+const { bookingLimiter } = require('../../middleware/rateLimiter')
+
+router.post('/hold', bookingLimiter, asyncHandler(BookingController.holdSeats))
+router.post('/cancel-hold', bookingLimiter, asyncHandler(BookingController.cancelHold))
+router.post('/checkout', bookingLimiter, asyncHandler(BookingController.checkout))
 router.get('/my-tickets', asyncHandler(BookingController.getMyTickets))
 
 module.exports = router

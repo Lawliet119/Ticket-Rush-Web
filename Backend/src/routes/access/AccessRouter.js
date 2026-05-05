@@ -6,11 +6,12 @@ const router = express.Router()
 const asyncHandler = require('../../middleware/errorHandler')
 
 const { authentication } = require('../../utils/authUtils')
+const { authLimiter } = require('../../middleware/rateLimiter')
 
-router.post('/signup', asyncHandler(AccessController.signUp))
-router.post('/login', asyncHandler(AccessController.logIn))
-router.post('/forgot-password', asyncHandler(AccessController.forgotPassword))
-router.post('/reset-password/:token', asyncHandler(AccessController.resetPassword))
+router.post('/signup', authLimiter, asyncHandler(AccessController.signUp))
+router.post('/login', authLimiter, asyncHandler(AccessController.logIn))
+router.post('/forgot-password', authLimiter, asyncHandler(AccessController.forgotPassword))
+router.post('/reset-password/:token', authLimiter, asyncHandler(AccessController.resetPassword))
 router.post('/refresh-token', asyncHandler(AccessController.handleRefreshToken))
 
 // Authentication required

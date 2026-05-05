@@ -29,6 +29,10 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+// Apply global rate limiter
+const { globalLimiter } = require('./src/middleware/rateLimiter')
+app.use(globalLimiter)
+
 // 1.5 Serve static files
 app.use(express.static('public'))
 
