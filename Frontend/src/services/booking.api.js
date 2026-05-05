@@ -12,6 +12,12 @@ export const holdSeatsApi = async (payload) => {
   return res.data
 }
 
+export const cancelHoldApi = async (payload) => {
+  // payload: { seatIds }
+  const res = await http.post('/booking/cancel-hold', payload)
+  return res.data
+}
+
 export const getMyTicketsApi = async () => {
   const res = await http.get('/booking/my-tickets')
   return res.data

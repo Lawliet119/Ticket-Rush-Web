@@ -20,12 +20,12 @@ export default function MyTicketsPage() {
             id: ticket.ticket_code,
             eventTitle: event.title || 'Unknown Event',
             image: event.banner_url || 'https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=2070&auto=format&fit=crop',
-            date: event.event_date ? new Date(event.event_date).toLocaleDateString('vi-VN') : '',
-            time: event.event_date ? new Date(event.event_date).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '',
+            date: event.event_date ? new Date(event.event_date).toLocaleDateString('en-US') : '',
+            time: event.event_date ? new Date(event.event_date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '',
             venue: event.venue || 'Unknown Venue',
             address: event.address || '',
             seats: `${item.zone_name} - ${item.seat_label}`,
-            totalPaid: `${Number(item.price).toLocaleString('vi-VN')} đ`,
+            totalPaid: `$${Number(item.price).toLocaleString('en-US')}`,
             status: ticket.status,
             qrData: ticket.qr_data
           };
@@ -64,7 +64,7 @@ export default function MyTicketsPage() {
             My Tickets
             <div className="absolute -bottom-3 left-0 w-1/2 h-1.5 bg-gradient-to-r from-purple-600 to-indigo-500 rounded-full"></div>
           </h1>
-          <p className="text-gray-500 mt-4 text-lg">Quản lý vé và chuẩn bị sẵn sàng cho sự kiện</p>
+          <p className="text-gray-500 mt-4 text-lg">Manage your tickets and get ready for the events</p>
         </div>
 
         {tickets.length === 0 ? (
@@ -75,8 +75,8 @@ export default function MyTicketsPage() {
             <div className="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
               <Ticket className="w-10 h-10 text-gray-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Chưa có vé nào</h3>
-            <p className="text-gray-500">Bạn chưa mua bất kỳ vé nào trên TicketRush.</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No tickets yet</h3>
+            <p className="text-gray-500">You haven't purchased any tickets on TicketRush.</p>
           </motion.div>
         ) : (
           <div className="space-y-8">

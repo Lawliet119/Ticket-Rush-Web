@@ -11,6 +11,7 @@ router.post('/signup', asyncHandler(AccessController.signUp))
 router.post('/login', asyncHandler(AccessController.logIn))
 router.post('/forgot-password', asyncHandler(AccessController.forgotPassword))
 router.post('/reset-password/:token', asyncHandler(AccessController.resetPassword))
+router.post('/refresh-token', asyncHandler(AccessController.handleRefreshToken))
 
 // Authentication required
 router.use(asyncHandler(authentication))

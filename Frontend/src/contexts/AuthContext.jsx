@@ -10,8 +10,8 @@ export function AuthProvider({ children }) {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      // BƯỚC BẢO VỆ CHỐNG SPAM BACKEND:
-      // Kiểm tra xem trình duyệt có token chưa. Nếu không có, gán user = null và dẹp luôn, KHÔNG GỌI API NỮA!
+      // GUARD: Prevent unnecessary API calls to backend:
+      // Check if browser has a token. If not, set user = null immediately without calling API!
       const token = localStorage.getItem('accessToken');
       if (!token) {
         setUser(null);
@@ -19,11 +19,11 @@ export function AuthProvider({ children }) {
         return; 
       }
 
-      // Nếu có token mới được phép gọi xuống BE
+      // Only call backend if token exists
       const res = await getMeApi();
       setUser(res.metadata);
     } catch (error) {
-      // Nếu token hết hạn hoặc sai (Lỗi 401), xóa sạch dữ liệu cũ
+      // If token is expired or invalid (401 error), clear all stored data
       localStorage.clear();
       setUser(null);
     } finally {
@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  // Khi app khởi động, tự động gọi fetchUser để kiểm tra xem người dùng đã đăng nhập chưa
+  // On app startup, automatically call fetchUser to check if the user is logged in
   useEffect(() => {
     fetchUser();
   }, []); 

@@ -35,7 +35,7 @@ export default function Profile() {
           setPreview(res.metadata.avatar_url);
         }
       } catch (err) {
-        console.error('Lỗi khi tải hồ sơ:', err);
+        console.error('Error loading profile:', err);
       } finally {
         setLoading(false);
       }
@@ -69,17 +69,17 @@ export default function Profile() {
       const res = await updateProfileApi(data);
       if (res.metadata) {
         setProfile(res.metadata);
-        alert('Cập nhật hồ sơ thành công!');
+        alert('Profile updated successfully!');
         window.location.reload(); 
       }
     } catch (err) {
-      alert('Có lỗi xảy ra khi cập nhật hồ sơ!');
+      alert('An error occurred while updating the profile!');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center font-bold text-gray-500">Đang tải hồ sơ...</div>;
+  if (loading) return <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center font-bold text-gray-500">Loading profile...</div>;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] py-12">
@@ -88,7 +88,7 @@ export default function Profile() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto px-4"
       >
-        <h1 className="text-3xl font-black text-gray-900 mb-8">Hồ Sơ Của Tôi</h1>
+        <h1 className="text-3xl font-black text-gray-900 mb-8">My Profile</h1>
         
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row">
           {/* Avatar Section */}
@@ -103,7 +103,7 @@ export default function Profile() {
               </div>
               <label className="absolute inset-0 bg-black/50 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white">
                 <Upload className="w-6 h-6 mb-1" />
-                <span className="text-xs font-bold uppercase tracking-wider">Tải lên</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Upload</span>
                 <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
               </label>
             </div>
@@ -111,7 +111,7 @@ export default function Profile() {
             <p className="text-gray-500 text-sm mt-1">{profile?.email}</p>
             {profile?.age > 0 && (
               <div className="mt-4 bg-purple-100 text-purple-700 px-4 py-1 rounded-full text-sm font-semibold">
-                {profile.age} tuổi
+                {profile.age} years old
               </div>
             )}
           </div>
@@ -121,30 +121,30 @@ export default function Profile() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Họ và Tên</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
                   <input type="text" name="full_name" value={formData.full_name} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-purple-500 focus:bg-white transition" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
                   <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-purple-500 focus:bg-white transition" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Ngày sinh</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Date of Birth</label>
                   <input type="date" name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-purple-500 focus:bg-white transition" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Giới tính</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
                   <select name="gender" value={formData.gender} onChange={handleChange} className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-purple-500 focus:bg-white transition">
-                    <option value="">Chọn giới tính</option>
-                    <option value="MALE">Nam</option>
-                    <option value="FEMALE">Nữ</option>
-                    <option value="OTHER">Khác</option>
+                    <option value="">Select gender</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
                   </select>
                 </div>
               </div>
               <div className="pt-6 border-t border-gray-100 flex justify-end">
                 <button type="submit" disabled={saving} className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md disabled:opacity-50">
-                  {saving ? 'Đang lưu...' : 'Lưu Thay Đổi'}
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>

@@ -4,8 +4,9 @@ const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const KeyTokenService = require('./keyToken.service')
 const { createTokenPair } = require('../utils/authUtils')
-const { BadRequestError, ConflictRequestError, NotFoundError } = require('../core/error.response')
+const { BadRequestError, ConflictRequestError, NotFoundError, AuthFailureError } = require('../core/error.response')
 const { sendEmail } = require('../utils/mailUtils')
+const JWT = require('jsonwebtoken')
 
 class AccessService {
     
@@ -142,6 +143,55 @@ class AccessService {
     static logout = async (userId) => {
         const delKey = await KeyTokenService.removeKeyByUserId(userId)
         return delKey
+    }
+
+    /**
+     * Handle Refresh Token
+     * - Read refresh token from HttpOnly cookie
+     * - If token found in refresh_tokens_used → Token Reuse Attack detected → Delete all tokens
+     * - If token is the current active one → Verify, rotate, return new pair
+     */
+    static handleRefreshToken = async (refreshToken) => {
+        // 1. Check if this refresh token has been used before (STOLEN TOKEN DETECTION)
+        const foundUsedToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken)
+        if (foundUsedToken) {
+            // Someone is reusing an old token! Delete all tokens for this user immediately
+            await KeyTokenService.removeKeyByUserId(foundUsedToken.user_id)
+            throw new AuthFailureError('Token reuse detected! Please login again.')
+        }
+
+        // 2. Find the key_token record that has this as its current active refresh token
+        const keyStore = await KeyTokenService.findByRefreshToken(refreshToken)
+        if (!keyStore) {
+            throw new AuthFailureError('Invalid refresh token')
+        }
+
+        // 3. Verify the refresh token using the stored public key
+        let decoded
+        try {
+            decoded = JWT.verify(refreshToken, keyStore.public_key, { algorithms: ['RS256'] })
+        } catch (err) {
+            throw new AuthFailureError('Refresh token expired or invalid')
+        }
+
+        // 4. Generate new token pair using the SAME keypair (no need to regenerate RSA keys)
+        const tokens = await createTokenPair(
+            { userId: decoded.userId, email: decoded.email },
+            keyStore.public_key,
+            keyStore.private_key
+        )
+
+        // 5. Rotate: archive old refresh token, save new one
+        await KeyTokenService.updateRefreshToken(
+            keyStore.user_id,
+            refreshToken,         // old token → push to refresh_tokens_used
+            tokens.refreshToken   // new token → set as current active
+        )
+
+        return {
+            userId: decoded.userId,
+            tokens
+        }
     }
 }
 

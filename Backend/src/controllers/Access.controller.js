@@ -71,6 +71,34 @@ class AccessController {
     }).send(res)
   }
 
+  handleRefreshToken = async (req, res, next) => {
+    // 1. Read refresh token from HttpOnly cookie
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      throw new (require('../core/error.response').AuthFailureError)('No refresh token provided');
+    }
+
+    // 2. Call service to verify + rotate
+    const result = await AccessService.handleRefreshToken(refreshToken);
+
+    // 3. Set new HttpOnly cookie with the rotated refresh token
+    res.cookie('refreshToken', result.tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    // 4. Return only access token to frontend (refresh token stays in cookie only)
+    new OK({
+      message: 'Token refreshed successfully!',
+      metadata: {
+        userId: result.userId,
+        accessToken: result.tokens.accessToken
+      }
+    }).send(res)
+  }
+
 }
 
 module.exports = new AccessController()

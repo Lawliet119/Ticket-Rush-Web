@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, CalendarDays, MapPin, ChevronLeft, ChevronRight, CheckCircle2, ShoppingCart, Ticket as TicketIcon } from 'lucide-react';
 import { getAllEventsApi } from '../services/event.api';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,15 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const scrollRef = useRef(null);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - clientWidth / 2 : scrollLeft + clientWidth / 2;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -97,61 +106,84 @@ export default function Home() {
         ) : events.length === 0 ? (
           <div className="text-center text-gray-500 py-10">No events available at the moment.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {events.map(event => (
-              <div 
-                key={event.id} 
-                onClick={() => {
-                  if (!user) {
-                    alert("Vui lòng đăng nhập để xem chi tiết và đặt vé sự kiện!");
-                  } else {
-                    navigate(`/events/${event.id}`);
-                  }
-                }} 
-                className="bg-white shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col cursor-pointer group"
-              >
-                
-                <div className="relative h-[250px] bg-gray-200 overflow-hidden">
-                  <img 
-                    src={event.banner_url || 'https://images.unsplash.com/photo-1540039155732-68ee23e15b51?auto=format&fit=crop&q=80'} 
-                    alt={event.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                  />
-                  {/* Venue overlay on image */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-3 flex items-center text-white text-xs font-medium">
-                    <MapPin className="w-3 h-3 mr-1.5" />
-                    <span className="truncate">{event.venue}</span>
-                  </div>
-                </div>
+          <div className="relative group -mx-4 px-4">
+            {/* Left Arrow */}
+            <button 
+              onClick={() => scroll('left')} 
+              className="absolute -left-2 md:-left-6 top-[calc(50%-20px)] z-20 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-gray-600 hover:text-purple-600 opacity-0 group-hover:opacity-100 transition-all duration-300"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
 
-                <div className="p-5 flex flex-col flex-grow border border-t-0 border-gray-100">
-                  <h3 className="text-base font-bold text-gray-800 leading-tight mb-2 truncate">{event.title}</h3>
+            {/* Carousel Container */}
+            <div 
+              ref={scrollRef} 
+              className="flex gap-8 overflow-x-auto snap-x scroll-smooth hide-scrollbar pb-6 pt-2"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {events.map(event => (
+                <div 
+                  key={event.id} 
+                  onClick={() => {
+                    if (!user) {
+                      alert("Please log in to view event details and book tickets!");
+                    } else {
+                      navigate(`/events/${event.id}`);
+                    }
+                  }} 
+                  className="min-w-[100%] md:min-w-[calc(50%-16px)] snap-start shrink-0 bg-white shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col cursor-pointer group/card"
+                >
                   
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm font-bold text-[#e67e22]">
-                      {(() => {
-                        if (!event.zones || event.zones.length === 0) return "Đang cập nhật";
-                        const prices = event.zones.map(z => Number(z.price));
-                        const min = Math.min(...prices);
-                        const max = Math.max(...prices);
-                        if (min === max) return `${min.toLocaleString('vi-VN')} ₫`;
-                        return `${min.toLocaleString('vi-VN')} ₫ - ${max.toLocaleString('vi-VN')} ₫`;
-                      })()}
-                    </span>
+                  <div className="relative h-[250px] bg-gray-200 overflow-hidden">
+                    <img 
+                      src={event.banner_url || 'https://images.unsplash.com/photo-1540039155732-68ee23e15b51?auto=format&fit=crop&q=80'} 
+                      alt={event.title} 
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-700" 
+                    />
+                    {/* Venue overlay on image */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-3 flex items-center text-white text-xs font-medium">
+                      <MapPin className="w-3 h-3 mr-1.5" />
+                      <span className="truncate">{event.venue}</span>
+                    </div>
                   </div>
 
-                  <div className="border-t border-gray-100 pt-3 flex justify-between items-center text-[10px] text-gray-400 uppercase font-semibold tracking-wider">
-                    <span className="flex items-center gap-1">
-                      <CalendarDays className="w-3 h-3" /> Charity
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <TicketIcon className="w-3 h-3" /> {event.available_seats}
-                    </span>
+                  <div className="p-5 flex flex-col flex-grow border border-t-0 border-gray-100">
+                    <h3 className="text-base font-bold text-gray-800 leading-tight mb-2 truncate">{event.title}</h3>
+                    
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-sm font-bold text-[#e67e22]">
+                        {(() => {
+                          if (!event.zones || event.zones.length === 0) return "Updating";
+                          const prices = event.zones.map(z => Number(z.price));
+                          const min = Math.min(...prices);
+                          const max = Math.max(...prices);
+                          if (min === max) return `$${min.toLocaleString('en-US')}`;
+                          return `$${min.toLocaleString('en-US')} - $${max.toLocaleString('en-US')}`;
+                        })()}
+                      </span>
+                    </div>
+
+                    <div className="border-t border-gray-100 pt-3 flex justify-between items-center text-[10px] text-gray-400 uppercase font-semibold tracking-wider">
+                      <span className="flex items-center gap-1">
+                        <CalendarDays className="w-3 h-3" /> Charity
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <TicketIcon className="w-3 h-3" /> {event.available_seats}
+                      </span>
+                    </div>
                   </div>
+                  
                 </div>
-                
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Right Arrow */}
+            <button 
+              onClick={() => scroll('right')} 
+              className="absolute -right-2 md:-right-6 top-[calc(50%-20px)] z-20 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-gray-600 hover:text-purple-600 opacity-0 group-hover:opacity-100 transition-all duration-300"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
           </div>
         )}
       </div>

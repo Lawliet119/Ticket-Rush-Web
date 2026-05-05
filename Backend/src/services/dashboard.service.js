@@ -36,7 +36,7 @@ class DashboardService {
         }));
 
         const genderData = genders.map(g => ({
-            name: g.gender === 'MALE' ? 'Nam' : g.gender === 'FEMALE' ? 'Nữ' : 'Khác',
+            name: g.gender === 'MALE' ? 'Male' : g.gender === 'FEMALE' ? 'Female' : 'Other',
             value: g._count.gender
         }));
 
@@ -54,8 +54,8 @@ class DashboardService {
             name: key, value: ageDemographics[key]
         }));
 
-        // 5. DOANH THU & VÉ TRONG 7 NGÀY QUA (Group By Date)
-        // Tạo khung 7 ngày (Để ngày nào không có đơn thì doanh thu = 0)
+        // 5. Revenue & tickets sold in the last 7 days (Group by Date)
+        // Create a 7-day frame (days with no orders default to revenue = 0)
         const revenueMap = {};
         for (let i = 6; i >= 0; i--) {
             const d = new Date();
@@ -64,7 +64,7 @@ class DashboardService {
             revenueMap[dateStr] = { date: dateStr, revenue: 0, tickets: 0 };
         }
 
-        // Nhồi data thật vào khung 7 ngày
+        // Fill actual data into the 7-day frame
         ordersLast7Days.forEach(order => {
             const d = new Date(order.created_at);
             const dateStr = `${d.getDate()}/${d.getMonth() + 1}`;

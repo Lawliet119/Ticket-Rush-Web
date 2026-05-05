@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { checkoutApi } from '../services/booking.api';
+import { checkoutApi, cancelHoldApi } from '../services/booking.api';
 
 export default function Checkout() {
   const location = useLocation();
@@ -22,14 +22,70 @@ export default function Checkout() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
 
+  // Use ref to track success state in cleanup (closures capture stale state)
+  const isSuccessRef = useRef(false);
+  const seatIdsRef = useRef(selectedSeats.map(s => s.id));
+  const releaseTimeoutRef = useRef(null);
+
+  // Release seats function
+  const releaseSeats = useCallback(async () => {
+    if (isSuccessRef.current || seatIdsRef.current.length === 0) return;
+    try {
+      await cancelHoldApi({ seatIds: seatIdsRef.current });
+    } catch (err) {
+      // Silent fail — cron job will clean up as a safety net
+      console.error('[Checkout] Failed to release seats:', err);
+    }
+  }, []);
+
+  // EFFECT 1: Release seats when leaving the page
   useEffect(() => {
+    // Cancel any pending release from StrictMode's fake unmount
+    if (releaseTimeoutRef.current) {
+      clearTimeout(releaseTimeoutRef.current);
+      releaseTimeoutRef.current = null;
+    }
+
     if (selectedSeats.length === 0) {
       navigate('/home');
       return;
     }
 
-    // Stop timer if payment is successful
-    if (isSuccess) return;
+    // Handle tab close / browser refresh
+    const handleBeforeUnload = () => {
+      if (isSuccessRef.current) return;
+      // Use fetch with keepalive for reliable delivery on tab close (supports auth headers)
+      const apiUrl = import.meta.env.VITE_API_URL || '/v1/api';
+      const token = localStorage.getItem('accessToken');
+      const userId = localStorage.getItem('userId');
+      fetch(`${apiUrl}/booking/cancel-hold`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': token,
+          'x-client-id': userId
+        },
+        body: JSON.stringify({ seatIds: seatIdsRef.current }),
+        keepalive: true, // Ensures request completes even after page unloads
+        credentials: 'include'
+      }).catch(() => {}); // Silent fail — cron will clean up
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Cleanup: delay release to handle React StrictMode double-mount
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Delay 100ms — if StrictMode remounts quickly, the timeout gets cancelled above
+      releaseTimeoutRef.current = setTimeout(() => {
+        releaseSeats();
+      }, 100);
+    };
+  }, [navigate, selectedSeats, releaseSeats]);
+
+  // EFFECT 2: Countdown timer
+  useEffect(() => {
+    if (selectedSeats.length === 0 || isSuccess) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -65,6 +121,7 @@ export default function Checkout() {
         seatIds: selectedSeats.map(s => s.id)
       };
       await checkoutApi(payload);
+      isSuccessRef.current = true; // Prevent cleanup from releasing seats
       setIsSuccess(true);
     } catch (err) {
       setCheckoutError(err?.response?.data?.message || 'Payment failed.');
@@ -102,7 +159,7 @@ export default function Checkout() {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-500 font-medium text-sm">Amount Paid</span>
-              <span className="font-black text-violet-600 text-lg">{totalPrice.toLocaleString('vi-VN')} đ</span>
+              <span className="font-black text-violet-600 text-lg">${totalPrice.toLocaleString('en-US')}</span>
             </div>
           </div>
 
@@ -170,7 +227,7 @@ export default function Checkout() {
             </div>
           </div>
 
-          {/* CỘT PHẢI: ORDER SUMMARY */}
+          {/* RIGHT COLUMN: ORDER SUMMARY */}
           <div className="w-full lg:w-[400px]">
             <div className="bg-white border border-gray-100 p-8 rounded-[2.5rem] shadow-xl sticky top-10">
               <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
@@ -183,7 +240,7 @@ export default function Checkout() {
               <div className="mb-6 pb-6 border-b border-gray-100">
                 <p className="font-bold text-gray-900">{eventData?.title || 'Unknown Event'}</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  {eventData?.event_date ? new Date(eventData.event_date).toLocaleString('vi-VN') : ''}
+                  {eventData?.event_date ? new Date(eventData.event_date).toLocaleString('en-US') : ''}
                 </p>
                 <p className="text-sm text-gray-500">{eventData?.venue}</p>
               </div>
@@ -191,17 +248,17 @@ export default function Checkout() {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-600">Tickets ({selectedSeats.length})</span>
-                  <span className="text-gray-900">{totalPrice.toLocaleString('vi-VN')} đ</span>
+                  <span className="text-gray-900">${totalPrice.toLocaleString('en-US')}</span>
                 </div>
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-600">Service Fee</span>
-                  <span className="text-gray-900">0 đ</span>
+                  <span className="text-gray-900">$0</span>
                 </div>
               </div>
 
               <div className="border-t border-gray-100 pt-6 mb-8 flex justify-between items-center">
                 <span className="text-xl font-black text-gray-900">Total</span>
-                <span className="text-2xl font-black text-violet-600">{totalPrice.toLocaleString('vi-VN')} đ</span>
+                <span className="text-2xl font-black text-violet-600">${totalPrice.toLocaleString('en-US')}</span>
               </div>
 
               {checkoutError && (

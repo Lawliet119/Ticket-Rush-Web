@@ -40,6 +40,32 @@ class BookingRepository {
         });
     }
 
+    // Cancel/release held seats when user leaves Checkout page
+    static cancelHold = async (userId, seatIds) => {
+        return await prisma.$transaction(async (tx) => {
+            // Only delete locks that belong to this user
+            const deleted = await tx.seat_locks.deleteMany({
+                where: { 
+                    user_id: userId, 
+                    seat_id: { in: seatIds } 
+                }
+            });
+
+            if (deleted.count > 0) {
+                // Set seats back to AVAILABLE (only if still LOCKED, not SOLD)
+                await tx.seats.updateMany({
+                    where: { 
+                        id: { in: seatIds }, 
+                        status: 'LOCKED' 
+                    },
+                    data: { status: 'AVAILABLE' }
+                });
+            }
+
+            return { released_seats: seatIds, count: deleted.count };
+        });
+    }
+
     // Create order and tickets from held seats
     static checkout = async (userId, eventId, seatIds) => {
         return await prisma.$transaction(async (tx) => {
