@@ -14,7 +14,7 @@ const adapter = new PrismaPg(pool)
 // 3. Initialize Prisma with this adapter
 const prisma = new PrismaClient({ 
     adapter,
-    log: ['query', 'info', 'warn', 'error']
+    log: ['error']
 })
 
 module.exports = prisma

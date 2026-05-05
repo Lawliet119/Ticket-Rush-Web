@@ -38,6 +38,26 @@ class CronService {
                 console.error('[Cron] Error scanning expired seats:', error);
             }
         });
+
+        // Run every 2 seconds to process the Virtual Queue
+        setInterval(async () => {
+            try {
+                // Ideally, we fetch active event IDs from DB. 
+                // For demonstration, we assume we process a specific event or we track active events in Redis.
+                const QueueService = require('./queue.service');
+                const redis = require('../config/redis');
+                
+                // Get all active events that have a queue
+                const keys = await redis.keys('queue:*');
+                const eventIds = keys.map(k => k.split(':')[1]);
+                
+                for (let eventId of eventIds) {
+                    await QueueService.processQueue(eventId);
+                }
+            } catch (error) {
+                console.error('[QueueProcessor] Error:', error);
+            }
+        }, 2000);
     }
 }
 

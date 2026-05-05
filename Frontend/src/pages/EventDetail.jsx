@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
 import { getEventDetailApi } from '../services/event.api';
 import SeatMap from '../components/SeatMap';
+import WaitingRoom from '../components/WaitingRoom';
 import { io } from 'socket.io-client';
 import { SOCKET_URL } from '../lib/socket';
 
@@ -13,6 +14,9 @@ export default function EventDetail() {
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Queue States
+  const [queueStatus, setQueueStatus] = useState('IN_QUEUE'); // IN_QUEUE, PASSED
 
   // 2. Fetch event data from API
   useEffect(() => {
@@ -103,9 +107,19 @@ export default function EventDetail() {
         </div>
       </div>
 
-      {/* 3. Pass real data to Seat Map */}
-      <div className="bg-gray-50 py-16 border-t border-gray-100">
-        <SeatMap eventData={eventData} />
+      {/* Queue and Seat Map Logic */}
+      <div className="bg-gray-50 py-16 border-t border-gray-100 min-h-[600px]">
+
+        {queueStatus === 'IN_QUEUE' && (
+          <WaitingRoom 
+            eventId={id} 
+            onPassed={() => setQueueStatus('PASSED')} 
+          />
+        )}
+
+        {queueStatus === 'PASSED' && (
+          <SeatMap eventData={eventData} />
+        )}
       </div>
     </div>
   );

@@ -31,7 +31,6 @@ model events {
   updated_at             DateTime                @default(now()) @db.Timestamptz(6)
   users                  users                   @relation(fields: [created_by], references: [id], onUpdate: NoAction, map: "fk_events_created_by")
   orders                 orders[]
-  virtual_queue_sessions virtual_queue_sessions?
   zones                  zones[]
 
   @@index([created_by], map: "idx_events_created_by")
@@ -81,26 +80,6 @@ model orders {
   @@index([status, expires_at], map: "idx_orders_pending_expires", where: raw("(status = 'PENDING'::order_status)"))
   @@index([status], map: "idx_orders_status")
   @@index([user_id], map: "idx_orders_user")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model queue_tokens {
-  id                     String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  session_id             String                 @db.Uuid
-  user_id                String                 @db.Uuid
-  position               Int
-  status                 queue_status           @default(WAITING)
-  access_token           String?                @unique(map: "idx_qt_access_token", where: raw("(access_token IS NOT NULL)")) @db.VarChar(128)
-  granted_at             DateTime?              @db.Timestamptz(6)
-  expires_at             DateTime?              @db.Timestamptz(6)
-  created_at             DateTime               @default(now()) @db.Timestamptz(6)
-  virtual_queue_sessions virtual_queue_sessions @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_qt_session")
-  users                  users                  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_qt_user")
-
-  @@unique([session_id, user_id], map: "uq_qt_session_user")
-  @@index([session_id, position], map: "idx_qt_session_position")
-  @@index([session_id, status], map: "idx_qt_session_status")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -179,29 +158,12 @@ model users {
   updated_at            DateTime       @default(now()) @db.Timestamptz(6)
   events        events[]
   orders        orders[]
-  queue_tokens  queue_tokens[]
   seat_locks    seat_locks[]
   tickets       tickets[]
   key_tokens    key_tokens[]
 
   @@index([gender], map: "idx_users_gender", where: raw("(gender IS NOT NULL)"))
   @@index([role], map: "idx_users_role")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model virtual_queue_sessions {
-  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  event_id             String         @unique(map: "uq_vqs_event") @db.Uuid
-  max_concurrent_users Int            @default(200)
-  batch_size           Int            @default(50)
-  current_active_users Int            @default(0)
-  total_enqueued       Int            @default(0)
-  is_active            Boolean        @default(true)
-  created_at           DateTime       @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime       @default(now()) @db.Timestamptz(6)
-  queue_tokens         queue_tokens[]
-  events               events         @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_vqs_event")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -244,14 +206,6 @@ enum order_status {
   PAID
   EXPIRED
   CANCELLED
-}
-
-enum queue_status {
-  WAITING
-  GRANTED
-  ENTERED
-  EXPIRED
-  LEFT
 }
 
 enum seat_status {
