@@ -4,6 +4,7 @@ import { Plus, Calendar, MapPin, Users, Edit, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getAllEventsApi, deleteEventApi } from '../../services/event.api';
 import { io } from 'socket.io-client';
+import { SOCKET_URL } from '../../lib/socket';
 
 export default function ManageEventsPage() {
   const [events, setEvents] = useState([]);
@@ -26,10 +27,8 @@ export default function ManageEventsPage() {
     // 2. Gọi lần đầu khi mở trang
     fetchEvents();
 
-    // 3. Kết nối Socket (Dùng biến môi trường để an toàn khi Deploy)
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/v1/api';
-    const backendUrl = apiUrl.replace('/v1/api', ''); // Cắt đuôi API để lấy gốc Server
-    const socket = io(backendUrl, { transports: ['websocket'] });
+    // 3. Kết nối Socket
+    const socket = io(SOCKET_URL, { transports: ['websocket'] });
     
     // 4. Lắng nghe Backend báo hiệu có vé được bán -> Lấy lại danh sách ngay lập tức
     socket.on('dashboard_stats_updated', () => {

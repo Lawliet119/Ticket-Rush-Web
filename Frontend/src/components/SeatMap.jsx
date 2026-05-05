@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
+import { SOCKET_URL } from '../lib/socket';
 import { holdSeatsApi } from '../services/booking.api';
 
 export default function SeatMap({ eventData }) {
@@ -14,12 +15,7 @@ export default function SeatMap({ eventData }) {
 
   // REAL-TIME SOCKET.IO ENGINE
   useEffect(() => {
-     // 1. Lấy URL Backend từ biến môi trường một cách an toàn
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/v1/api';
-    const backendUrl = apiUrl.replace('/v1/api', ''); // Remove API suffix to get Root Server URL
-
-    // const newSocket = io(backendUrl, { transports: ['websocket'] });
-    const newSocket = io('http://localhost:3000', { transports: ['websocket'] });
+    const newSocket = io(SOCKET_URL, { transports: ['websocket'] });
     setSocket(newSocket);
 
     // 2. Sync locked seats from Server on connection

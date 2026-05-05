@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, MapPin, Users } from 'lucide-react';
 import { getEventDetailApi } from '../services/event.api';
 import SeatMap from '../components/SeatMap';
 import { io } from 'socket.io-client';
+import { SOCKET_URL } from '../lib/socket';
 
 export default function EventDetail() {
   // 1. Lấy ID từ URL
@@ -27,7 +28,7 @@ export default function EventDetail() {
     };
     fetchDetail();
 
-    const socket = io('http://localhost:3000');
+    const socket = io(SOCKET_URL);
     socket.on('dashboard_stats_updated', () => {
       fetchDetail();
     });

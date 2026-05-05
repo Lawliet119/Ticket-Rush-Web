@@ -1,6 +1,7 @@
 'use strict'
 const AccessService = require('../services/access.service')
 const { OK, CREATED } = require('../core/success.response')
+const { setRefreshTokenCookie } = require('../utils/authUtils')
 
 class AccessController {
 
@@ -20,14 +21,7 @@ class AccessController {
   logIn = async (req, res, next) => {
     const result = await AccessService.logIn(req.body);
 
-    res.cookie('refreshToken', result.tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
-
-  
+    setRefreshTokenCookie(res, result.tokens.refreshToken);
     delete result.tokens.refreshToken;
 
     new OK({
@@ -40,12 +34,7 @@ class AccessController {
     const result = await AccessService.signUp(req.body);
 
     // Set HttpOnly Cookie
-    res.cookie('refreshToken', result.tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    setRefreshTokenCookie(res, result.tokens.refreshToken);
 
     // Remove refreshToken from the body sent to frontend
     delete result.tokens.refreshToken;

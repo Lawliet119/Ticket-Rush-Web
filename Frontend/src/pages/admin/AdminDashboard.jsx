@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, Ticket, DollarSign, Calendar } from 'lucide-react';
 import { getDashboardStatsApi } from '../../services/event.api'; 
-import { io } from 'socket.io-client'; 
+import { io } from 'socket.io-client';
+import { SOCKET_URL } from '../../lib/socket'; 
 
 const COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'];
 
@@ -36,7 +37,7 @@ export default function AdminDashboard() {
     };
     fetchDashboard();
 
-    const socket = io('http://localhost:3000');
+    const socket = io(SOCKET_URL);
     socket.on('dashboard_stats_updated', () => {
       fetchDashboard();
     });
