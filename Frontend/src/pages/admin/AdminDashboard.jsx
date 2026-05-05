@@ -29,7 +29,7 @@ export default function AdminDashboard() {
           setStatsData(res.metadata);
         }
       } catch (err) {
-        setError("Không thể tải dữ liệu. Hãy đảm bảo Backend đã viết xong API GET /dashboard/stats");
+        setError("Failed to load data. Make sure the backend API GET /dashboard/stats is running.");
       } finally {
         setLoading(false);
       }
@@ -46,14 +46,14 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl font-bold text-gray-500">Đang đồng bộ dữ liệu hệ thống...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl font-bold text-gray-500">Syncing system data...</div>;
   if (error) return <div className="min-h-screen flex items-center justify-center text-xl font-bold text-red-500">{error}</div>;
 
   const stats = [
-    { title: 'Tổng Doanh Thu', value: `${(statsData.summary?.totalRevenue || 0).toLocaleString('vi-VN')} ₫`, icon: DollarSign, color: 'bg-green-500' },
-    { title: 'Vé Đã Bán', value: statsData.summary?.ticketsSold || 0, icon: Ticket, color: 'bg-purple-500' },
-    { title: 'Sự Kiện Đang Chạy', value: statsData.summary?.activeEvents || 0, icon: Calendar, color: 'bg-blue-500' },
-    { title: 'Tổng Khách Hàng', value: statsData.summary?.totalCustomers || 0, icon: Users, color: 'bg-orange-500' },
+    { title: 'Total Revenue', value: `${(statsData.summary?.totalRevenue || 0).toLocaleString('en-US')} $`, icon: DollarSign, color: 'bg-green-500' },
+    { title: 'Tickets Sold', value: statsData.summary?.ticketsSold || 0, icon: Ticket, color: 'bg-purple-500' },
+    { title: 'Active Events', value: statsData.summary?.activeEvents || 0, icon: Calendar, color: 'bg-blue-500' },
+    { title: 'Total Customers', value: statsData.summary?.totalCustomers || 0, icon: Users, color: 'bg-orange-500' },
   ];
 
   return (
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
       <div className="container mx-auto px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-          <p className="text-gray-600">Thống kê dữ liệu thực tế từ Database</p>
+          <p className="text-gray-600">Live statistics from Database</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -81,9 +81,9 @@ export default function AdminDashboard() {
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold">Biểu Đồ Doanh Thu</h2>
+              <h2 className="text-xl font-bold">Revenue Chart</h2>
               <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)} className="text-sm border rounded px-3 py-1 outline-none font-medium">
-                <option value="7d">7 Ngày qua</option>
+                <option value="7d">Last 7 Days</option>
               </select>
             </div>
             {statsData.revenueChart?.length > 0 ? (
@@ -97,12 +97,12 @@ export default function AdminDashboard() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-400">Chưa có dữ liệu doanh thu</div>
+              <div className="h-[300px] flex items-center justify-center text-gray-400">No revenue data yet</div>
             )}
           </div>
 
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-            <h2 className="text-xl font-bold mb-6">Xu Hướng Bán Vé</h2>
+            <h2 className="text-xl font-bold mb-6">Ticket Sales Trend</h2>
             {statsData.revenueChart?.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={statsData.revenueChart}>
@@ -114,14 +114,14 @@ export default function AdminDashboard() {
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-400">Chưa có dữ liệu vé bán</div>
+              <div className="h-[300px] flex items-center justify-center text-gray-400">No ticket sales data yet</div>
             )}
           </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-            <h2 className="text-xl font-bold mb-6">Độ Tuổi Khán Giả</h2>
+            <h2 className="text-xl font-bold mb-6">Audience Age</h2>
             {statsData.demographicsData?.length > 0 && statsData.demographicsData.some(d => d.value > 0) ? (
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
@@ -132,12 +132,12 @@ export default function AdminDashboard() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[250px] flex items-center justify-center text-gray-400 text-sm">Chưa đủ dữ liệu độ tuổi</div>
+              <div className="h-[250px] flex items-center justify-center text-gray-400 text-sm">Not enough age data</div>
             )}
           </div>
 
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-            <h2 className="text-xl font-bold mb-6">Giới Tính Khán Giả</h2>
+            <h2 className="text-xl font-bold mb-6">Audience Gender</h2>
             {statsData.genderData?.length > 0 && statsData.genderData.some(d => d.value > 0) ? (
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
@@ -148,15 +148,15 @@ export default function AdminDashboard() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[250px] flex items-center justify-center text-gray-400 text-sm">Chưa đủ dữ liệu giới tính</div>
+              <div className="h-[250px] flex items-center justify-center text-gray-400 text-sm">Not enough gender data</div>
             )}
           </div>
 
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
-            <h2 className="text-xl font-bold mb-6">Tỷ Lệ Lấp Đầy Sự Kiện</h2>
+            <h2 className="text-xl font-bold mb-6">Event Occupancy Rate</h2>
             <div className="space-y-4">
               {!statsData.eventOccupancy || statsData.eventOccupancy.length === 0 ? (
-                <p className="text-gray-400 text-sm text-center py-10">Chưa có sự kiện nào được tạo.</p>
+                <p className="text-gray-400 text-sm text-center py-10">No events have been created yet.</p>
               ) : (
                 statsData.eventOccupancy.map((event) => {
                   const percentage = event.total > 0 ? (event.occupancy / event.total) * 100 : 0;

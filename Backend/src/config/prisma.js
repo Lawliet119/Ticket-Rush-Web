@@ -5,13 +5,13 @@ const { PrismaClient } = require('../generated/prisma')
 const { PrismaPg } = require('@prisma/adapter-pg')
 const { Pool } = require('pg')
 
-// 1. Tạo một bể kết nối (Pool) bằng thư viện 'pg' thuần
+// 1. Create a connection pool using the native 'pg' library
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
-// 2. Bọc bể kết nối này vào Adapter của Prisma
+// 2. Wrap the connection pool in a Prisma adapter
 const adapter = new PrismaPg(pool)
 
-// 3. Khởi tạo Prisma với Adapter này
+// 3. Initialize Prisma with this adapter
 const prisma = new PrismaClient({ 
     adapter,
     log: ['query', 'info', 'warn', 'error']

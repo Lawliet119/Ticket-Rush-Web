@@ -57,7 +57,8 @@ const io = new Server(server, {
         credentials: true
     }
 });
-global._io = io;
+const { setIO } = require('./src/config/socket');
+setIO(io);
 // Load socket logic
 require('./src/sockets/seatSocket')(io);
 

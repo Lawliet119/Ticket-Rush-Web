@@ -11,7 +11,7 @@ import Home from './pages/Home';
 import CreateEvent from './pages/CreateEvent';
 import ResetPassword from './pages/ResetPassword';
 
-// Import các trang mới tạo
+// Import additional pages
 import MyTicketsPage from './pages/MyTicketsPage';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -61,7 +61,7 @@ function App() {
           </ProtectedRoute>
         } />
 
-        {/* Đưa CreateEvent vào AdminLayout */}
+        {/* CreateEvent inside AdminLayout */}
         <Route path="/create-event" element={
           <ProtectedRoute requireAdmin={true}>
             <AdminLayout><CreateEvent /></AdminLayout>

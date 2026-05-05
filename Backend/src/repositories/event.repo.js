@@ -51,7 +51,7 @@ class EventRepository {
                                 zone_id: newZone.id,
                                 row_number: r,
                                 seat_number: s,
-                                label: `${String.fromCharCode(64 + r)}${s}`, // Ví dụ: A1, A2, B1...
+                                label: `${String.fromCharCode(64 + r)}${s}`, // e.g. A1, A2, B1...
                                 status: 'AVAILABLE'
                             })
                         }
@@ -131,22 +131,22 @@ class EventRepository {
 
     static deleteEvent = async (id) => {
         return await prisma.$transaction(async (tx) => {
-            // Lấy danh sách các đơn hàng của sự kiện này
+            // Get all orders belonging to this event
             const orders = await tx.orders.findMany({ where: { event_id: id } });
             
             if (orders.length > 0) {
                 const orderIds = orders.map(o => o.id);
-                // Xóa tất cả vé liên quan đến các đơn hàng này
+                // Delete all tickets related to these orders
                 await tx.tickets.deleteMany({ where: { order_id: { in: orderIds } } });
                 
-                // Xóa tất cả order_items
+                // Delete all order items
                 await tx.order_items.deleteMany({ where: { order_id: { in: orderIds } } });
                 
-                // Xóa các đơn hàng
+                // Delete all orders
                 await tx.orders.deleteMany({ where: { event_id: id } });
             }
 
-            // DB sẽ tự động cascade xóa zones, seats, vqs...
+            // DB will automatically cascade-delete zones, seats, etc.
             return await tx.events.delete({
                 where: { id }
             });

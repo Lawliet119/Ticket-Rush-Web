@@ -1,5 +1,8 @@
 'use strict'
-const { createKeyToken, findByUserId, removeKeyByUserId } = require('../repositories/keyToken.repo')
+const { 
+    createKeyToken, findByUserId, removeKeyByUserId,
+    findByRefreshToken, findByRefreshTokenUsed, updateRefreshToken 
+} = require('../repositories/keyToken.repo')
 
 class KeyTokenService {
     static createKeyToken = async ({ userId, publicKey, privateKey, refreshToken }) => {
@@ -27,6 +30,18 @@ class KeyTokenService {
 
     static removeKeyByUserId = async (userId) => {
         return await removeKeyByUserId(userId)
+    }
+
+    static findByRefreshToken = async (refreshToken) => {
+        return await findByRefreshToken(refreshToken)
+    }
+
+    static findByRefreshTokenUsed = async (refreshToken) => {
+        return await findByRefreshTokenUsed(refreshToken)
+    }
+
+    static updateRefreshToken = async (userId, oldRefreshToken, newRefreshToken) => {
+        return await updateRefreshToken(userId, oldRefreshToken, newRefreshToken)
     }
 }
 

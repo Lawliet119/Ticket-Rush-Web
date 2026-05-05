@@ -31,7 +31,7 @@ export default function AdminLayout({ children }) {
             <Link to="/admin/dashboard" className={`transition ${isActive('/admin/dashboard')}`}>Dashboard</Link>
             <Link to="/admin/events" className={`transition ${isActive('/admin/events')}`}>Events</Link>
             
-            {/* NÚT QUAY LẠI GIAO DIỆN KHÁN GIẢ */}
+            {/* BUTTON: SWITCH TO CUSTOMER VIEW */}
             <Link to="/home" className="flex items-center gap-1 text-gray-600 hover:text-purple-600 transition">
               <ArrowLeftRight className="w-4 h-4" /> Customer View
             </Link>

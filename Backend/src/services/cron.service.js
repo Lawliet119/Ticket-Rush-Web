@@ -4,8 +4,8 @@ const prisma = require('../config/prisma');
 
 class CronService {
     static init(io) {
-        // Run every 5 seconds for quick testing (could be every 1 minute in production)
-        cron.schedule('*/5 * * * * *', async () => {
+        // Run every 30 seconds to clean up expired seat locks
+        cron.schedule('*/30 * * * * *', async () => {
             try {
                 const now = new Date();
                 

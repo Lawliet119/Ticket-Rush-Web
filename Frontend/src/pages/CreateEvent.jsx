@@ -8,9 +8,9 @@ export default function CreateEvent() {
   // State management for event form
   const [form, setForm] = useState({
     title: '',
-    description: '',   // ✅ Thêm field còn thiếu
+    description: '',   // Added missing field
     venue: '',
-    address: '',       // ✅ Thêm field còn thiếu
+    address: '',       // Added missing field
     event_date: '',
     sale_start_at: '',
     sale_end_at: '',
@@ -36,9 +36,9 @@ export default function CreateEvent() {
       if (file.type.startsWith('image/')) {
         setBannerFile(file);
         setBannerPreview(URL.createObjectURL(file));
-        setError(''); // Xóa lỗi nếu có
+        setError(''); // Clear error if any
       } else {
-        setError('Vui lòng chỉ tải lên file hình ảnh!');
+        setError('Please upload image files only!');
       }
     }
   };
@@ -64,7 +64,7 @@ export default function CreateEvent() {
         setBannerPreview(URL.createObjectURL(file));
         setError('');
       } else {
-        setError('Vui lòng chỉ tải lên file hình ảnh!');
+        setError('Please upload image files only!');
       }
     }
   };
@@ -93,7 +93,7 @@ export default function CreateEvent() {
     // VALIDATION LIST
     // ==========================================
     if (!form.title.trim() || !form.venue.trim()) {
-      setError('Tên sự kiện và địa điểm không được để trống!');
+      setError('Event title and venue are required!');
       setLoading(false); return;
     }
 
@@ -103,20 +103,20 @@ export default function CreateEvent() {
     const saleEnd = new Date(form.sale_end_at);
 
     if (saleStart < now) {
-      setError('Thời gian mở bán vé không được ở trong quá khứ!');
+      setError('Ticket sale start time cannot be in the past!');
       setLoading(false); return;
     }
     if (saleStart >= saleEnd) {
-      setError('Thời gian kết thúc bán vé phải SAU thời gian mở bán!');
+      setError('Sale end time must be AFTER the sale start time!');
       setLoading(false); return;
     }
     if (saleStart >= eventDate) {
-      setError('Phải mở bán vé TRƯỚC khi sự kiện diễn ra!');
+      setError('Ticket sales must start BEFORE the event date!');
       setLoading(false); return;
     }
 
     if (zones.length === 0) {
-      setError('Phải có ít nhất 1 khu vực ghế!');
+      setError('At least 1 seating zone is required!');
       setLoading(false); return;
     }
 
@@ -126,19 +126,19 @@ export default function CreateEvent() {
       const zName = z.name.trim();
 
       if (!zName) {
-        setError(`Tên khu vực ở hàng thứ ${i + 1} không được để trống!`);
+        setError(`Zone name at row ${i + 1} cannot be empty!`);
         setLoading(false); return;
       }
       if (Number(z.rows) <= 0 || Number(z.seats_per_row) <= 0) {
-        setError(`Khu vực "${zName}" phải có ít nhất 1 hàng và 1 ghế!`);
+        setError(`Zone "${zName}" must have at least 1 row and 1 seat!`);
         setLoading(false); return;
       }
       if (Number(z.price) < 0) {
-        setError(`Giá vé khu vực "${zName}" không được âm!`);
+        setError(`Ticket price for zone "${zName}" cannot be negative!`);
         setLoading(false); return;
       }
       if (zoneNames.has(zName.toLowerCase())) {
-        setError(`Tên khu vực "${zName}" bị trùng lặp!`);
+        setError(`Zone name "${zName}" is duplicated!`);
         setLoading(false); return;
       }
       zoneNames.add(zName.toLowerCase());
@@ -180,10 +180,10 @@ export default function CreateEvent() {
       }
 
       await createEventApi(formData);
-      // Chuyển về trang quản lý event sau khi tạo thành công
+      // Redirect to events management page after successful creation
       navigate('/admin/events');
     } catch (err) {
-      setError(err?.response?.data?.message || 'Có lỗi xảy ra khi tạo sự kiện.');
+      setError(err?.response?.data?.message || 'An error occurred while creating the event.');
     } finally {
       setLoading(false);
     }
@@ -191,33 +191,33 @@ export default function CreateEvent() {
 
   return (
     <div className="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-      <h2 className="text-3xl font-bold text-gray-900 mb-6">Tạo Sự Kiện Mới</h2>
+      <h2 className="text-3xl font-bold text-gray-900 mb-6">Create New Event</h2>
       
       <form onSubmit={onSubmit} className="space-y-8">
-        {/* Phần 1: Thông tin chung */}
+        {/* Section 1: General Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg">
-          {/* Tên sự kiện */}
+          {/* Event Title */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Tên sự kiện <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium mb-1">Event Title <span className="text-red-500">*</span></label>
             <input name="title" value={form.title} onChange={handleFormChange} required className="w-full px-4 py-2 border rounded-lg" />
           </div>
 
-          {/* Mô tả */}
+          {/* Description */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Mô tả sự kiện</label>
+            <label className="block text-sm font-medium mb-1">Event Description</label>
             <textarea
               name="description"
               value={form.description}
               onChange={handleFormChange}
               rows={3}
-              placeholder="Mô tả chi tiết về sự kiện..."
+              placeholder="Detailed description of the event..."
               className="w-full px-4 py-2 border rounded-lg resize-none"
             />
           </div>
 
           {/* Upload Banner */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Banner/Poster sự kiện</label>
+            <label className="block text-sm font-medium mb-1">Event Banner/Poster</label>
             <div 
               className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
                 isDragging ? 'border-purple-500 bg-purple-50' : 'border-gray-300 bg-white'
@@ -245,57 +245,57 @@ export default function CreateEvent() {
                     </svg>
                     <div className="mt-4 flex text-sm text-gray-600 justify-center">
                       <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-purple-500">
-                        <span>Nhấn để chọn ảnh</span>
+                        <span>Click to select image</span>
                         <input id="file-upload" name="file-upload" type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                       </label>
-                      <p className="pl-1">hoặc kéo thả vào đây</p>
+                      <p className="pl-1">or drag and drop here</p>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">PNG, JPG, GIF (Tối đa 5MB)</p>
+                    <p className="text-xs text-gray-500 mt-2">PNG, JPG, GIF (Max 5MB)</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Địa điểm (tên sân/venue) */}
+          {/* Venue Name */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Tên địa điểm (Venue) <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium mb-1">Venue Name <span className="text-red-500">*</span></label>
             <input name="venue" value={form.venue} onChange={handleFormChange} required className="w-full px-4 py-2 border rounded-lg" />
           </div>
 
-          {/* Địa chỉ cụ thể */}
+          {/* Specific Address */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium mb-1">Địa chỉ cụ thể</label>
+            <label className="block text-sm font-medium mb-1">Address</label>
             <input
               name="address"
               value={form.address}
               onChange={handleFormChange}
-              placeholder="Ví dụ: 22 Nguyễn Du, Quận 1, TP.HCM"
+              placeholder="e.g. 123 Main St, District 1, HCMC"
               className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
 
-          {/* Thời gian */}
+          {/* Date & Time */}
           <div>
-            <label className="block text-sm font-medium mb-1">Thời gian diễn ra <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium mb-1">Event Date <span className="text-red-500">*</span></label>
             <input name="event_date" type="datetime-local" value={form.event_date} onChange={handleFormChange} required className="w-full px-4 py-2 border rounded-lg" />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Bắt đầu mở bán vé <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium mb-1">Sale Start Date <span className="text-red-500">*</span></label>
             <input name="sale_start_at" type="datetime-local" value={form.sale_start_at} onChange={handleFormChange} required className="w-full px-4 py-2 border rounded-lg" />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Kết thúc bán vé <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium mb-1">Sale End Date <span className="text-red-500">*</span></label>
             <input name="sale_end_at" type="datetime-local" value={form.sale_end_at} onChange={handleFormChange} required className="w-full px-4 py-2 border rounded-lg" />
           </div>
         </div>
 
-        {/* Phần 2: Cấu hình Khu vực ghế (Zones) */}
+        {/* Section 2: Seat Zone Configuration */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold text-gray-800">Cấu hình Sơ đồ ghế (Zones)</h3>
+            <h3 className="text-xl font-bold text-gray-800">Seat Map Configuration (Zones)</h3>
             <button type="button" onClick={addZone} className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800">
-              + Thêm Khu Vực
+              + Add Zone
             </button>
           </div>
 
@@ -305,23 +305,23 @@ export default function CreateEvent() {
                 <button type="button" onClick={() => removeZone(index)} className="absolute top-2 right-3 text-red-500 font-bold hover:text-red-700">X</button>
               )}
               <div className="col-span-2">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Tên khu (VD: VIP, ZONE A)</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Zone Name (e.g. VIP, ZONE A)</label>
                 <input name="name" value={zone.name} onChange={(e) => handleZoneChange(index, e)} required className="w-full px-3 py-2 border rounded-md" />
               </div>
               <div className="col-span-1">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Số hàng</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Rows</label>
                 <input name="rows" type="number" min="1" value={zone.rows} onChange={(e) => handleZoneChange(index, e)} required className="w-full px-3 py-2 border rounded-md" />
               </div>
               <div className="col-span-1">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Ghế/hàng</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Seats/Row</label>
                 <input name="seats_per_row" type="number" min="1" value={zone.seats_per_row} onChange={(e) => handleZoneChange(index, e)} required className="w-full px-3 py-2 border rounded-md" />
               </div>
               <div className="col-span-1">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Giá vé (VNĐ)</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Price ($)</label>
                 <input name="price" type="number" min="0" value={zone.price} onChange={(e) => handleZoneChange(index, e)} required className="w-full px-3 py-2 border rounded-md" />
               </div>
               <div className="col-span-1">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Màu hiển thị</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Display Color</label>
                 <input name="color_hex" type="color" value={zone.color_hex} onChange={(e) => handleZoneChange(index, e)} required className="w-full h-[42px] p-1 border rounded-md cursor-pointer" />
               </div>
             </div>
@@ -329,7 +329,7 @@ export default function CreateEvent() {
         </div>
 
         <button type="submit" disabled={loading} className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition shadow-lg disabled:opacity-50">
-          {loading ? 'Đang khởi tạo ma trận ghế...' : 'Lưu Sự Kiện & Tạo Sơ Đồ'}
+          {loading ? 'Generating seat matrix...' : 'Save Event & Create Seat Map'}
         </button>
       </form>
 

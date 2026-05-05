@@ -21,7 +21,7 @@ export default function Login() {
 
     try {
       const data = await loginApi(form)
-      console.log('Đăng nhập thành công:', data)
+      console.log('Login successful:', data)
 
       localStorage.setItem('accessToken', data.metadata.tokens.accessToken) 
       localStorage.setItem('userId', data.metadata.user.id) 
@@ -29,7 +29,7 @@ export default function Login() {
       await fetchUser();
       navigate('/home') 
     } catch (err) {
-      setError(err?.response?.data?.message || err?.message || 'Đăng nhập thất bại')
+      setError(err?.response?.data?.message || err?.message || 'Login failed')
     } finally {
       setLoading(false)
     }
@@ -37,7 +37,7 @@ export default function Login() {
 
   return (
     <div className="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Đăng nhập</h2>
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <div>
@@ -51,8 +51,8 @@ export default function Login() {
 
         <div>
           <div className="flex justify-between">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
-            <Link to="/forgot-password" name="forgot" className="text-sm text-indigo-600 hover:underline">Quên mật khẩu?</Link>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <Link to="/forgot-password" name="forgot" className="text-sm text-indigo-600 hover:underline">Forgot password?</Link>
           </div>
           <input
             name="password" type="password" placeholder="••••••••"
@@ -63,11 +63,11 @@ export default function Login() {
 
         <button type="submit" disabled={loading}
           className="w-full mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:opacity-50">
-          {loading ? 'Đang xác thực...' : 'Đăng nhập'}
+          {loading ? 'Authenticating...' : 'Login'}
         </button>
         
         <p className="text-center text-sm text-gray-600 mt-4">
-          Chưa có tài khoản? <Link to="/signup" className="text-indigo-600 font-semibold hover:underline">Đăng ký ngay</Link>
+          Don't have an account? <Link to="/signup" className="text-indigo-600 font-semibold hover:underline">Sign up now</Link>
         </p>
       </form>
 

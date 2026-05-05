@@ -13,9 +13,9 @@ export default function ForgotPassword() {
     setLoading(true); setMessage(''); setError('')
     try {
       const data = await forgotPasswordApi({ email })
-      setMessage(data?.message || 'Link khôi phục đã được gửi vào email của bạn!')
+      setMessage(data?.message || 'A recovery link has been sent to your email!')
     } catch (err) {
-      setError(err?.response?.data?.message || 'Không thể gửi yêu cầu. Vui lòng thử lại.')
+      setError(err?.response?.data?.message || 'Unable to send request. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -23,8 +23,8 @@ export default function ForgotPassword() {
 
   return (
     <div className="max-w-md mx-auto mt-16 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-      <h2 className="text-3xl font-bold text-center text-gray-900 mb-2">Quên mật khẩu?</h2>
-      <p className="text-center text-gray-600 mb-6 text-sm">Nhập email của bạn và chúng tôi sẽ gửi link đặt lại mật khẩu.</p>
+      <h2 className="text-3xl font-bold text-center text-gray-900 mb-2">Forgot Password?</h2>
+      <p className="text-center text-gray-600 mb-6 text-sm">Enter your email and we'll send you a password reset link.</p>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <div>
@@ -37,11 +37,11 @@ export default function ForgotPassword() {
 
         <button type="submit" disabled={loading}
           className="w-full mt-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-md shadow-violet-200 disabled:opacity-50">
-          {loading ? 'Đang gửi...' : 'Gửi yêu cầu'}
+          {loading ? 'Sending...' : 'Send Request'}
         </button>
         
         <p className="text-center text-sm text-gray-600 mt-4">
-          Nhớ mật khẩu rồi? <Link to="/login" className="text-violet-600 font-semibold hover:underline">Quay lại đăng nhập</Link>
+          Remember your password? <Link to="/login" className="text-violet-600 font-semibold hover:underline">Back to Login</Link>
         </p>
       </form>
 

@@ -39,6 +39,18 @@ class BookingController {
             metadata: tickets
         }).send(res);
     }
+
+    cancelHold = async (req, res, next) => {
+        const userId = req.userId;
+        const { seatIds } = req.body;
+
+        const result = await BookingService.cancelHold({ userId, seatIds });
+
+        new OK({
+            message: 'Seat holds released successfully.',
+            metadata: result
+        }).send(res);
+    }
 }
 
 module.exports = new BookingController()

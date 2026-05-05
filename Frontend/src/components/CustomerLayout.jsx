@@ -107,7 +107,7 @@ export default function CustomerLayout({ children }) {
             <div className="space-y-6">
               <div>
                 <h3 className="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wide">Hotline</h3>
-                <p className="text-sm mb-1">Thứ 2 - Chủ Nhật (8:00 - 23:00)</p>
+                <p className="text-sm mb-1">Mon - Sun (8:00 AM - 11:00 PM)</p>
                 <p className="text-xl font-black text-purple-600">1900.6408</p>
               </div>
               
@@ -117,10 +117,10 @@ export default function CustomerLayout({ children }) {
               </div>
               
               <div>
-                <h3 className="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wide">Văn phòng chính</h3>
+                <h3 className="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wide">Headquarters</h3>
                 <p className="text-sm leading-relaxed">
-                  Tòa nhà Công nghệ, Đại học Quốc Gia Hà Nội,<br/>
-                  144 Xuân Thủy, Cầu Giấy, Hà Nội
+                  Technology Building, Vietnam National University,<br/>
+                  144 Xuan Thuy, Cau Giay, Hanoi
                 </p>
               </div>
             </div>
@@ -128,31 +128,31 @@ export default function CustomerLayout({ children }) {
             {/* Column 2: Customer & Organizer Links */}
             <div className="space-y-8">
               <div>
-                <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Dành cho Khách hàng</h3>
+                <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">For Customers</h3>
                 <ul className="space-y-3 text-sm">
-                  <li><a href="#" className="hover:text-purple-600 transition-colors">Điều khoản sử dụng cho khách hàng</a></li>
+                  <li><a href="#" className="hover:text-purple-600 transition-colors">Terms of Service for Customers</a></li>
                 </ul>
               </div>
               
               <div>
-                <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Dành cho Ban Tổ chức</h3>
+                <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">For Organizers</h3>
                 <ul className="space-y-3 text-sm">
-                  <li><a href="#" className="hover:text-purple-600 transition-colors">Điều khoản sử dụng cho ban tổ chức</a></li>
+                  <li><a href="#" className="hover:text-purple-600 transition-colors">Terms of Service for Organizers</a></li>
                 </ul>
               </div>
             </div>
 
             {/* Column 3: About Us */}
             <div>
-              <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Về công ty chúng tôi</h3>
+              <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">About Us</h3>
               <ul className="space-y-3 text-sm">
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Quy chế hoạt động</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Chính sách bảo mật thông tin</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Cơ chế giải quyết tranh chấp/ khiếu nại</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Chính sách bảo mật thanh toán</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Chính sách đổi trả và kiểm hàng</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Điều kiện vận chuyển và giao nhận</a></li>
-                <li><a href="#" className="hover:text-purple-600 transition-colors">Phương thức thanh toán</a></li>
+                <li><a href="#" className="hover:text-purple-600 transition-colors">Operating Regulations</a></li>
+                <li><a href="#" className="hover:text-purple-600 transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-purple-600 transition-colors">Dispute Resolution</a></li>
+                <li><a href="#" className="hover:text-purple-600 transition-colors">Payment Security Policy</a></li>
+                <li><a href="#" className="hover:text-purple-600 transition-colors">Return & Refund Policy</a></li>
+                <li><a href="#" className="hover:text-purple-600 transition-colors">Shipping & Delivery Terms</a></li>
+                <li><a href="#" className="hover:text-purple-600 transition-colors">Payment Methods</a></li>
               </ul>
             </div>
           </div>
@@ -161,19 +161,19 @@ export default function CustomerLayout({ children }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {/* TicketRush App */}
             <div>
-              <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Ứng dụng TicketRush</h3>
+              <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">TicketRush App</h3>
               <div className="flex flex-col gap-3">
                 <button className="w-40 h-12 bg-white border border-gray-200 shadow-sm rounded-lg flex items-center justify-center gap-3 hover:border-purple-300 hover:ring-2 hover:ring-purple-100 transition">
                   <Globe className="w-6 h-6 text-gray-700" />
                   <div className="text-left leading-tight">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Tải ngay trên</p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Download on</p>
                     <p className="text-sm font-bold text-gray-900">Google Play</p>
                   </div>
                 </button>
                 <button className="w-40 h-12 bg-white border border-gray-200 shadow-sm rounded-lg flex items-center justify-center gap-3 hover:border-purple-300 hover:ring-2 hover:ring-purple-100 transition">
                   <Ticket className="w-6 h-6 text-gray-700" />
                   <div className="text-left leading-tight">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Tải ngay trên</p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Download on</p>
                     <p className="text-sm font-bold text-gray-900">App Store</p>
                   </div>
                 </button>
@@ -182,19 +182,19 @@ export default function CustomerLayout({ children }) {
 
             {/* Organizer Check-in App */}
             <div>
-              <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Check-in (Ban tổ chức)</h3>
+              <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Check-in (Organizers)</h3>
               <div className="flex flex-col gap-3">
                 <button className="w-40 h-12 bg-white border border-gray-200 shadow-sm rounded-lg flex items-center justify-center gap-3 hover:border-purple-300 hover:ring-2 hover:ring-purple-100 transition">
                   <Globe className="w-6 h-6 text-gray-700" />
                   <div className="text-left leading-tight">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Tải ngay trên</p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Download on</p>
                     <p className="text-sm font-bold text-gray-900">Google Play</p>
                   </div>
                 </button>
                 <button className="w-40 h-12 bg-white border border-gray-200 shadow-sm rounded-lg flex items-center justify-center gap-3 hover:border-purple-300 hover:ring-2 hover:ring-purple-100 transition">
                   <Ticket className="w-6 h-6 text-gray-700" />
                   <div className="text-left leading-tight">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Tải ngay trên</p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">Download on</p>
                     <p className="text-sm font-bold text-gray-900">App Store</p>
                   </div>
                 </button>
@@ -219,9 +219,9 @@ export default function CustomerLayout({ children }) {
               </div>
               
               <div>
-                <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Ngôn ngữ</h3>
+                <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Language</h3>
                 <div className="flex gap-3 text-2xl">
-                  <span className="cursor-pointer hover:scale-110 transition-transform" title="Tiếng Việt">🇻🇳</span>
+                  <span className="cursor-pointer hover:scale-110 transition-transform" title="Vietnamese">🇻🇳</span>
                   <span className="cursor-pointer hover:scale-110 transition-transform grayscale hover:grayscale-0" title="English">🇬🇧</span>
                 </div>
               </div>
