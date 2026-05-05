@@ -24,7 +24,9 @@ export function AuthProvider({ children }) {
       setUser(res.metadata);
     } catch (error) {
       // If token is expired or invalid (401 error), clear all stored data
-      localStorage.clear();
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('userId')
+      localStorage.removeItem('role')
       setUser(null);
     } finally {
       setLoading(false);

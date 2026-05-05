@@ -14,7 +14,7 @@ function isImageFile(file) {
   return file && file.type && file.type.startsWith('image/')
 }
 
-function getValidationMessage(form) {
+function getValidationMessage(form, { enforceSaleStartInFuture = true } = {}) {
   if (!form.title.trim() || !form.venue.trim()) {
     return 'name and venue are required fields and cannot be empty!'
   }
@@ -28,7 +28,7 @@ function getValidationMessage(form) {
   const saleStart = new Date(form.sale_start_at)
   const saleEnd = new Date(form.sale_end_at)
 
-  if (saleStart < now) {
+  if (enforceSaleStartInFuture && saleStart < now) {
     return 'Sale start time cannot be in the past!'
   }
 
@@ -49,6 +49,7 @@ export default function EventForm({
   submitLoadingLabel,
   initialForm = defaultForm,
   initialBannerPreview = '',
+  enforceSaleStartInFuture = true,
   extraValidate,
   onSubmit,
   children,
@@ -118,7 +119,7 @@ export default function EventForm({
     setLoading(true)
     setError('')
 
-    const validationMessage = getValidationMessage(form)
+    const validationMessage = getValidationMessage(form, { enforceSaleStartInFuture })
     if (validationMessage) {
       setError(validationMessage)
       setLoading(false)

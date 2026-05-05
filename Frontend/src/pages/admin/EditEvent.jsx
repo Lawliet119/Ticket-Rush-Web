@@ -66,6 +66,7 @@ export default function EditEvent() {
       submitLoadingLabel="Updating..."
       initialForm={initialForm}
       initialBannerPreview={initialBannerPreview}
+      enforceSaleStartInFuture={false}
       onSubmit={handleSubmit}
     />
   )

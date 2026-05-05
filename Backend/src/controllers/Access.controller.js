@@ -82,12 +82,7 @@ class AccessController {
     const result = await AccessService.handleRefreshToken(refreshToken);
 
     // 3. Set new HttpOnly cookie with the rotated refresh token
-    res.cookie('refreshToken', result.tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    setRefreshTokenCookie(res, result.tokens.refreshToken)
 
     // 4. Return only access token to frontend (refresh token stays in cookie only)
     new OK({

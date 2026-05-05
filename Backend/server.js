@@ -10,9 +10,14 @@ const app = express()
 const PORT = process.env.PORT || 3000
 const { Server } = require('socket.io');
 
+const allowedOrigins = (process.env.FRONTEND_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+
 // 1. Init middlewares
 app.use(cors({
-    origin: 'http://localhost:5173', // Frontend address (Vite default is 5173)
+    origin: allowedOrigins,
     credentials: true
 }))
 app.use(cookieParser())
@@ -52,7 +57,7 @@ const server = app.listen(PORT, () => {
 // 3.5 Init Socket.IO
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:5173', // Allow Frontend access
+        origin: allowedOrigins,
         methods: ["GET", "POST"],
         credentials: true
     }

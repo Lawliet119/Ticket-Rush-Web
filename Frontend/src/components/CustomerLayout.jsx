@@ -1,10 +1,9 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Ticket, User, LogOut, LayoutDashboard, MessageCircle, Globe, Share2, Mail } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function CustomerLayout({ children }) {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const { user } = useAuth();
   const role = user?.role;
@@ -12,7 +11,9 @@ export default function CustomerLayout({ children }) {
   const isActive = (path) => location.pathname === path ? "text-purple-600 font-semibold" : "text-gray-600 hover:text-purple-600";
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('role');
     window.location.href = '/login';
   };
 

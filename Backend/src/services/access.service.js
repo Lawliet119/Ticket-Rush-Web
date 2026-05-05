@@ -23,7 +23,8 @@ class AccessService {
         await updatePasswordResetToken(email, resetToken, resetTokenExpires)
 
         // 4. Send email
-        const resetUrl = `http://localhost:5173/reset-password/${resetToken}`
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
+        const resetUrl = `${frontendUrl}/reset-password/${resetToken}`
         const html = `
             <h3>Reset Password Request</h3>
             <p>You requested a password reset. Click the link below to set a new password:</p>
