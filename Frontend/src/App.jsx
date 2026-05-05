@@ -33,8 +33,17 @@ function App() {
         <Route path="/reset-password/:token" element={<CustomerLayout><ResetPassword /></CustomerLayout>} />
         <Route path="/home" element={<CustomerLayout><Home /></CustomerLayout>} />
         
-        <Route path="/events/:id" element={<CustomerLayout><EventDetail /></CustomerLayout>} />
-        <Route path="/checkout" element={<CustomerLayout><Checkout /></CustomerLayout>} />
+        <Route path="/events/:id" element={
+          <ProtectedRoute>
+            <CustomerLayout><EventDetail /></CustomerLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/checkout" element={
+          <ProtectedRoute>
+            <CustomerLayout><Checkout /></CustomerLayout>
+          </ProtectedRoute>
+        } />
 
         <Route path="/my-tickets" element={
           <ProtectedRoute>
