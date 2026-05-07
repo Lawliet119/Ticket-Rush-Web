@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { SOCKET_URL } from '../lib/socket';
 import { Loader2 } from 'lucide-react';
@@ -9,6 +9,11 @@ export default function WaitingRoom({ eventId, onPassed }) {
   const [status, setStatus] = useState('CONNECTING'); // CONNECTING, WAITING, GRANTED
   const [hasWaited, setHasWaited] = useState(false);
   const { user } = useAuth();
+  
+  // Use refs to track latest state without triggering re-effects
+  const isGrantedRef = useRef(false);
+  const hasWaitedRef = useRef(false);
+  const statusRef = useRef('CONNECTING');
 
   useEffect(() => {
     if (!user) return; // Prevent connecting if not logged in
@@ -22,15 +27,20 @@ export default function WaitingRoom({ eventId, onPassed }) {
 
     socket.on('queue_position', (data) => {
       setStatus('WAITING');
+      statusRef.current = 'WAITING';
       setPosition(data.position);
       setHasWaited(true);
+      hasWaitedRef.current = true;
     });
 
     socket.on('queue_passed', (data) => {
       setStatus('GRANTED');
+      statusRef.current = 'GRANTED';
+      isGrantedRef.current = true;
+      socket.emit('transitioning_to_seatmap');
       localStorage.setItem(`booking_token_${eventId}`, data.token);
       
-      if (!hasWaited) {
+      if (!hasWaitedRef.current) {
         // Instantly skip to seat map without showing the waiting room UI
         onPassed();
       } else {
@@ -43,12 +53,12 @@ export default function WaitingRoom({ eventId, onPassed }) {
 
     return () => {
       // Leave queue if user unmounts this component early
-      if (status !== 'GRANTED') {
+      if (!isGrantedRef.current) {
         socket.emit('leave_queue', eventId, user.id);
       }
       socket.disconnect();
     };
-  }, [eventId, user, onPassed, status]);
+  }, [eventId, user, onPassed]);
 
   // If granted instantly, hide the UI to make it seamless
   if (status === 'GRANTED' && !hasWaited) return null;

@@ -5,7 +5,7 @@ const { getIO } = require('../config/socket');
 const crypto = require('crypto');
 
 // Throttling configuration
-const MAX_ACTIVE_USERS = 50; // ⚠️ Đang set = 0 ĐỂ TEST GIAO DIỆN PHÒNG CHỜ (Mặc định là 50)
+const MAX_ACTIVE_USERS = 2; // ⚠️ Đang set = 0 ĐỂ TEST GIAO DIỆN PHÒNG CHỜ (Mặc định là 50)
 const BATCH_SIZE = 20;
 
 class QueueService {

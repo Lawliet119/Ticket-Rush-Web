@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { SOCKET_URL } from '../lib/socket';
 import { holdSeatsApi } from '../services/booking.api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function SeatMap({ eventData }) {
   const [selectedSeats, setSelectedSeats] = useState([]);
@@ -12,6 +13,7 @@ export default function SeatMap({ eventData }) {
   const [isHolding, setIsHolding] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // REAL-TIME SOCKET.IO ENGINE
   useEffect(() => {
@@ -22,6 +24,11 @@ export default function SeatMap({ eventData }) {
     newSocket.on('sync_seats', (lockedList) => {
       setRealtimeLockedSeats(lockedList);
     });
+
+    // Register socket to handle unexpected disconnects
+    if (user && eventData && eventData.id) {
+      newSocket.emit('register_seatmap', eventData.id, user.id);
+    }
 
     // 3. Listen for seat lock/unlock events
     newSocket.on('seat_updated', (seatId, isLocking) => {
@@ -39,8 +46,13 @@ export default function SeatMap({ eventData }) {
     });
 
     // Disconnect on unmount
-    return () => newSocket.disconnect();
-  }, []);
+    return () => {
+      if (user && eventData && eventData.id) {
+        newSocket.emit('leave_queue', eventData.id, user.id);
+      }
+      newSocket.disconnect();
+    };
+  }, [eventData, user]);
 
    if (!eventData || !eventData.zones || eventData.zones.length === 0) {
     return <div className="py-20 text-center text-xl font-bold text-gray-500">Seat map not configured for this event!</div>;

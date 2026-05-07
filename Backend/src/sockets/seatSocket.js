@@ -24,6 +24,10 @@ module.exports = (io) => {
         // VIRTUAL QUEUE HANDLERS
         socket.on('join_queue', async (eventId, userId) => {
             try {
+                // Attach info to socket for disconnect cleanup
+                socket.eventId = eventId;
+                socket.userId = userId;
+
                 const QueueService = require('../services/queue.service');
                 const result = await QueueService.joinQueue(eventId, userId, socket.id);
                 if (result.status === 'GRANTED') {
@@ -45,8 +49,25 @@ module.exports = (io) => {
             }
         });
 
-        socket.on('disconnect', () => {
+        socket.on('register_seatmap', (eventId, userId) => {
+            socket.eventId = eventId;
+            socket.userId = userId;
+        });
+
+        socket.on('transitioning_to_seatmap', () => {
+            socket.transitioning = true;
+        });
+
+        socket.on('disconnect', async () => {
             console.log(`[Socket] Client disconnected: ${socket.id}`);
+            if (socket.eventId && socket.userId && !socket.transitioning) {
+                try {
+                    const QueueService = require('../services/queue.service');
+                    await QueueService.removeFromActive(socket.eventId, socket.userId);
+                } catch (error) {
+                    console.error('[Socket] disconnect cleanup error:', error);
+                }
+            }
         });
     });
 };
