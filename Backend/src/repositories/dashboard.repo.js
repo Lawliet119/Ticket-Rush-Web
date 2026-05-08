@@ -2,6 +2,10 @@
 const prisma = require('../config/prisma');
 
 class DashboardRepo {
+    /**
+     * Get total revenue from all paid orders
+     * @returns {Promise<Object>} Aggregation result with sum of total_amount
+     */
     static getRevenueResult = async () => {
         return await prisma.orders.aggregate({
             _sum: { total_amount: true },
@@ -9,10 +13,18 @@ class DashboardRepo {
         });
     }
 
+    /**
+     * Get total number of active tickets sold
+     * @returns {Promise<number>} Count of tickets
+     */
     static getTicketsSold = async () => {
         return await prisma.tickets.count({ where: { status: 'ACTIVE' } });
     }
 
+    /**
+     * Get count of currently active or upcoming events
+     * @returns {Promise<number>} Count of active events
+     */
     static getActiveEvents = async () => {
         const now = new Date();
         return await prisma.events.count({ 
@@ -29,10 +41,18 @@ class DashboardRepo {
         });
     }
 
+    /**
+     * Get total number of customers registered in the system
+     * @returns {Promise<number>} Count of customers
+     */
     static getTotalCustomers = async () => {
         return await prisma.users.count({ where: { role: 'CUSTOMER' } });
     }
 
+    /**
+     * Get the 5 most recently created events with their occupancy data
+     * @returns {Promise<Array>} List of events with occupancy stats
+     */
     static getRecentEvents = async () => {
         const events = await prisma.events.findMany({
             take: 5, orderBy: { created_at: 'desc' },
@@ -54,6 +74,10 @@ class DashboardRepo {
         }));
     }
 
+    /**
+     * Group customers by gender for demographic stats
+     * @returns {Promise<Array>} List of gender counts
+     */
     static getGenders = async () => {
         return await prisma.users.groupBy({
             by: ['gender'],
@@ -62,6 +86,10 @@ class DashboardRepo {
         });
     }
 
+    /**
+     * Get age data for all customers
+     * @returns {Promise<Array>} List of user ages
+     */
     static getUsersWithAge = async () => {
         return await prisma.users.findMany({
             where: { role: 'CUSTOMER', age: { not: null } },
@@ -69,6 +97,11 @@ class DashboardRepo {
         });
     }
 
+    /**
+     * Get orders created within the last 7 days
+     * @param {Date} sevenDaysAgo - Starting date for the filter
+     * @returns {Promise<Array>} List of recent orders
+     */
     static getOrdersLast7Days = async (sevenDaysAgo) => {
         return await prisma.orders.findMany({
             where: { status: 'PAID', created_at: { gte: sevenDaysAgo } },

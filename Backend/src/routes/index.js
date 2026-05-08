@@ -1,6 +1,10 @@
 'use strict'
 
 const express = require('express')
+/**
+ * Main application router
+ * Aggregates all versioned API routes
+ */
 const router = express.Router()
 router.use('/v1/api/event',require('./event/EventRouter'))
 router.use('/v1/api/booking', require('./booking/BookingRouter'))

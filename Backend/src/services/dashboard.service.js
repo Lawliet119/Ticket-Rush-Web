@@ -2,6 +2,10 @@
 const DashboardRepo = require('../repositories/dashboard.repo');
 
 class DashboardService {
+    /**
+     * Retrieve aggregated statistics for the dashboard
+     * @returns {Promise<Object>} Object containing summary, occupancy, gender, demographics, and revenue data
+     */
     static getStats = async () => {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);

@@ -12,6 +12,9 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 
 // 3. Initialize Prisma with this adapter
+/**
+ * Shared Prisma Client instance with PostgreSQL adapter
+ */
 const prisma = new PrismaClient({ 
     adapter,
     log: ['error']

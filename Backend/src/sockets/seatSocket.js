@@ -3,6 +3,10 @@
 
 const lockedSeats = new Set();
 
+/**
+ * Socket.io handlers for real-time seat selection and virtual queue
+ * @param {Object} io - Socket.io server instance
+ */
 module.exports = (io) => {
     io.on('connection', (socket) => {
         console.log(`[Socket] Client connected: ${socket.id}`);

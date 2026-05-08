@@ -2,13 +2,26 @@
 
 const BookingRepository = require('../repositories/booking.repo')
 const { BadRequestError } = require('../core/error.response')
+const { validateUUIDArray, isValidUUID } = require('../utils/validator')
 const { getIO } = require('../config/socket')
 
 class BookingService {
     
+    /**
+     * Temporarily hold seats for a user
+     * @param {Object} params - Holding parameters
+     * @param {string} params.userId - ID of the user holding seats
+     * @param {string} params.eventId - ID of the event
+     * @param {Array<string>} params.seatIds - List of seat IDs to hold
+     * @returns {Promise<Object>} Holding result
+     */
     static holdSeats = async ({ userId, eventId, seatIds }) => {
-        if (!seatIds || seatIds.length === 0) {
-            throw new BadRequestError('Please select at least 1 seat to hold');
+        if (!isValidUUID(eventId)) {
+            throw new BadRequestError('Invalid event ID format');
+        }
+        const seatValidation = validateUUIDArray(seatIds, 'seatIds');
+        if (seatValidation) {
+            throw new BadRequestError(seatValidation);
         }
 
         try {
@@ -26,9 +39,21 @@ class BookingService {
         }
     }
     
+    /**
+     * Complete the checkout process for held seats
+     * @param {Object} params - Checkout parameters
+     * @param {string} params.userId - ID of the user checking out
+     * @param {string} params.eventId - ID of the event
+     * @param {Array<string>} params.seatIds - List of seat IDs to buy
+     * @returns {Promise<Object>} Checkout result
+     */
     static checkout = async ({ userId, eventId, seatIds }) => {
-        if (!seatIds || seatIds.length === 0) {
-            throw new BadRequestError('Please select at least 1 seat to checkout');
+        if (!isValidUUID(eventId)) {
+            throw new BadRequestError('Invalid event ID format');
+        }
+        const seatValidation = validateUUIDArray(seatIds, 'seatIds');
+        if (seatValidation) {
+            throw new BadRequestError(seatValidation);
         }
 
         try {
@@ -48,12 +73,28 @@ class BookingService {
         }
     }
 
+    /**
+     * Retrieve all tickets belonging to a specific user
+     * @param {string} userId - User ID
+     * @returns {Promise<Array>} List of tickets
+     */
     static getMyTickets = async (userId) => {
         return await BookingRepository.getMyTickets(userId);
     }
 
+    /**
+     * Cancel held seats and make them available again
+     * @param {Object} params - Cancellation parameters
+     * @param {string} params.userId - User ID
+     * @param {Array<string>} params.seatIds - List of seat IDs to release
+     * @returns {Promise<Object>} Cancellation result
+     */
     static cancelHold = async ({ userId, seatIds }) => {
         if (!seatIds || seatIds.length === 0) return { count: 0 };
+        const seatValidation = validateUUIDArray(seatIds, 'seatIds');
+        if (seatValidation) {
+            throw new BadRequestError(seatValidation);
+        }
 
         try {
             const result = await BookingRepository.cancelHold(userId, seatIds);

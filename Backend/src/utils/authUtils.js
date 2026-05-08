@@ -9,6 +9,13 @@ const HEADER = {
     AUTHORIZATION: 'authorization'
 }
 
+/**
+ * Create a pair of Access Token and Refresh Token
+ * @param {Object} payload - Data to be encoded in the token
+ * @param {string} publicKey - Public key for verification
+ * @param {string} privateKey - Private key for signing
+ * @returns {Promise<Object>} Object containing accessToken and refreshToken
+ */
 const createTokenPair = async (payload, publicKey, privateKey) => {
     try {
         const accessToken = JWT.sign(payload, privateKey, {
@@ -31,6 +38,12 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
     }
 }
 
+/**
+ * Authentication middleware to verify user tokens
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next function
+ */
 const authentication = async (req, res, next) => {
     // 1. Check userId
     const userId = req.headers[HEADER.CLIENT_ID]
@@ -67,6 +80,11 @@ const authentication = async (req, res, next) => {
     }
 }
 
+/**
+ * Middleware to check if user has required roles
+ * @param {Array<string>} roles - List of allowed roles
+ * @returns {Function} Middleware function
+ */
 const checkRole = (roles = []) => {
     return (req, res, next) => {
         if (!req.user || !roles.includes(req.user.role)) {
@@ -76,6 +94,11 @@ const checkRole = (roles = []) => {
     }
 }
 
+/**
+ * Set refresh token as an HTTP-only cookie
+ * @param {Object} res - Express response object
+ * @param {string} refreshToken - The refresh token string
+ */
 const setRefreshTokenCookie = (res, refreshToken) => {
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,

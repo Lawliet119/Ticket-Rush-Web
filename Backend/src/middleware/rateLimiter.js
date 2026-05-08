@@ -2,6 +2,10 @@
 const rateLimit = require('express-rate-limit')
 
 // Global limiter: 100 requests per 15 minutes per IP
+/**
+ * Global rate limiter to protect the API from general flooding
+ * 100 requests per 15 minutes per IP
+ */
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
     max: 100, 
@@ -15,6 +19,10 @@ const globalLimiter = rateLimit({
 })
 
 // Auth limiter: 10 requests per 15 minutes per IP (Stricter for brute force/spam)
+/**
+ * Stricter rate limiter for authentication routes (Login/Signup/Forgot Password)
+ * 10 requests per 15 minutes per IP
+ */
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10,
@@ -28,6 +36,10 @@ const authLimiter = rateLimit({
 })
 
 // Booking limiter: 20 requests per 15 minutes per IP (To prevent bot booking)
+/**
+ * Rate limiter for sensitive booking routes to prevent bot spam
+ * 20 requests per 15 minutes per IP
+ */
 const bookingLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 20,

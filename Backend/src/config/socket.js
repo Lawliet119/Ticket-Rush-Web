@@ -7,10 +7,19 @@
  */
 let _io = null;
 
+/**
+ * Initialize the global Socket.io instance
+ * @param {Object} io - Socket.io server instance
+ */
 const setIO = (io) => {
     _io = io;
 };
 
+/**
+ * Retrieve the global Socket.io instance
+ * @returns {Object} Socket.io server instance
+ * @throws {Error} If socket has not been initialized
+ */
 const getIO = () => {
     if (!_io) {
         throw new Error('Socket.IO has not been initialized. Call setIO() first.');

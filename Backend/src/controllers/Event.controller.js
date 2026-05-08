@@ -5,6 +5,12 @@ const { OK, CREATED } = require('../core/success.response')
 
 class EventController {
     
+    /**
+     * Handle event creation request (with optional file upload)
+     * @param {Object} req - Express request object
+     * @param {Object} res - Express response object
+     * @param {Function} next - Express next function
+     */
     createEvent = async (req, res, next) => {
         const payload = req.body;
         
@@ -27,6 +33,12 @@ class EventController {
         }).send(res)
     }
 
+    /**
+     * Handle request to list all events with filters
+     * @param {Object} req - Express request object
+     * @param {Object} res - Express response object
+     * @param {Function} next - Express next function
+     */
     getAllEvents = async (req, res, next) => {
         new OK({
             message: 'Get events list success!',
@@ -34,6 +46,12 @@ class EventController {
         }).send(res)
     }
 
+    /**
+     * Handle request for a single event's detailed information
+     * @param {Object} req - Express request object
+     * @param {Object} res - Express response object
+     * @param {Function} next - Express next function
+     */
     getEventDetail = async (req, res, next) => {
         new OK({
             message: 'Get event detail success!',
@@ -41,6 +59,12 @@ class EventController {
         }).send(res)
     }
 
+    /**
+     * Handle event update request
+     * @param {Object} req - Express request object
+     * @param {Object} res - Express response object
+     * @param {Function} next - Express next function
+     */
     updateEvent = async (req, res, next) => {
         const payload = req.body;
         
@@ -55,6 +79,12 @@ class EventController {
         }).send(res)
     }
 
+    /**
+     * Handle event deletion request
+     * @param {Object} req - Express request object
+     * @param {Object} res - Express response object
+     * @param {Function} next - Express next function
+     */
     deleteEvent = async (req, res, next) => {
         await EventService.deleteEvent(req.params.id)
         new OK({

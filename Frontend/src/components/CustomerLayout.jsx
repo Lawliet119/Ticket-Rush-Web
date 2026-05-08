@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Ticket, User, LogOut, LayoutDashboard, MessageCircle, Globe, Share2, Mail } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { logoutApi } from '../services/auth.api';
 
 export default function CustomerLayout({ children }) {
   const location = useLocation();
@@ -10,7 +11,13 @@ export default function CustomerLayout({ children }) {
 
   const isActive = (path) => location.pathname === path ? "text-purple-600 font-semibold" : "text-gray-600 hover:text-purple-600";
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch (err) {
+      // Silent fail — still clear local storage and redirect
+      console.error('Logout API error:', err);
+    }
     localStorage.removeItem('accessToken');
     localStorage.removeItem('userId');
     localStorage.removeItem('role');

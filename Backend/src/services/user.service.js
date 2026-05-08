@@ -1,19 +1,22 @@
 'use strict'
-const prisma = require('../config/prisma')
+const { getUserProfile, updateUserProfile } = require('../repositories/user.repo')
 
 class UserService {
+    /**
+     * Retrieve user profile information
+     * @param {string} userId - User ID
+     * @returns {Promise<Object>} User profile object
+     */
     static getProfile = async (userId) => {
-        const user = await prisma.users.findUnique({
-            where: { id: userId },
-            select: {
-                id: true, email: true, full_name: true, role: true,
-                date_of_birth: true, gender: true, avatar_url: true,
-                phone: true, age: true
-            }
-        });
-        return user;
+        return await getUserProfile(userId);
     }
 
+    /**
+     * Update user profile information
+     * @param {string} userId - User ID
+     * @param {Object} payload - New profile data
+     * @returns {Promise<Object>} Updated user profile object
+     */
     static updateProfile = async (userId, payload) => {
         let age = payload.age ? parseInt(payload.age, 10) : undefined;
         
@@ -33,15 +36,7 @@ class UserService {
         if (payload.avatar_url) updateData.avatar_url = payload.avatar_url;
         if (age !== undefined) updateData.age = age;
 
-        return await prisma.users.update({
-            where: { id: userId },
-            data: updateData,
-            select: {
-                id: true, email: true, full_name: true, role: true,
-                date_of_birth: true, gender: true, avatar_url: true,
-                phone: true, age: true
-            }
-        });
+        return await updateUserProfile(userId, updateData);
     }
 }
 module.exports = UserService;

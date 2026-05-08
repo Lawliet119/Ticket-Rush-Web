@@ -5,11 +5,17 @@ const crypto = require('crypto')
 const KeyTokenService = require('./keyToken.service')
 const { createTokenPair } = require('../utils/authUtils')
 const { BadRequestError, ConflictRequestError, NotFoundError, AuthFailureError } = require('../core/error.response')
+const { validatePassword, validateEmail } = require('../utils/validator')
 const { sendEmail } = require('../utils/mailUtils')
 const JWT = require('jsonwebtoken')
 
 class AccessService {
     
+    /**
+     * Send a password reset email to the user
+     * @param {string} email - User email address
+     * @returns {Promise<boolean>} True if successful
+     */
     static forgotPassword = async (email) => {
         // 1. Check user exists
         const user = await findUserByEmail(email)
@@ -41,7 +47,17 @@ class AccessService {
         return true
     }
 
+    /**
+     * Reset user password using a valid token
+     * @param {string} token - Password reset token
+     * @param {string} newPassword - New password string
+     * @returns {Promise<boolean>} True if successful
+     */
     static resetPassword = async (token, newPassword) => {
+        // 0. Validate new password strength
+        const passwordError = validatePassword(newPassword)
+        if (passwordError) throw new BadRequestError(passwordError)
+
         // 1. Find user by valid token
         const user = await findUserByResetToken(token)
         if (!user) throw new BadRequestError('Invalid or expired reset token')
@@ -55,6 +71,13 @@ class AccessService {
         return true
     }
 
+    /**
+     * Authenticate user and generate token pair
+     * @param {Object} params - Login parameters
+     * @param {string} params.email - User email
+     * @param {string} params.password - User password
+     * @returns {Promise<Object>} Object containing user info and tokens
+     */
     static logIn = async ({ email, password }) => {
         // 1. Check user exists
         const foundUser = await findUserByEmail(email)
@@ -93,7 +116,26 @@ class AccessService {
         }
     }
 
+    /**
+     * Register a new user and generate token pair
+     * @param {Object} params - Signup parameters
+     * @param {string} params.name - User full name
+     * @param {string} params.email - User email
+     * @param {string} params.password - User password
+     * @returns {Promise<Object>} Object containing user info and tokens
+     */
     static signUp = async ({ name, email, password }) => {
+        // 0. Validate input
+        if (!name || typeof name !== 'string' || name.trim().length < 2) {
+            throw new BadRequestError('Full name must be at least 2 characters')
+        }
+
+        const emailError = validateEmail(email)
+        if (emailError) throw new BadRequestError(emailError)
+
+        const passwordError = validatePassword(password)
+        if (passwordError) throw new BadRequestError(passwordError)
+
         // 1. Check if user already exists
         const holderUser = await findUserByEmail(email)
         if (holderUser) {
@@ -141,6 +183,11 @@ class AccessService {
         }
     }
 
+    /**
+     * Logout user by removing their key record
+     * @param {string} userId - ID of the user to logout
+     * @returns {Promise<Object>} Deletion result
+     */
     static logout = async (userId) => {
         const delKey = await KeyTokenService.removeKeyByUserId(userId)
         return delKey
@@ -151,6 +198,11 @@ class AccessService {
      * - Read refresh token from HttpOnly cookie
      * - If token found in refresh_tokens_used → Token Reuse Attack detected → Delete all tokens
      * - If token is the current active one → Verify, rotate, return new pair
+     */
+    /**
+     * Handle Refresh Token rotation and detect reuse
+     * @param {string} refreshToken - Current refresh token
+     * @returns {Promise<Object>} New token pair and userId
      */
     static handleRefreshToken = async (refreshToken) => {
         // 1. Check if this refresh token has been used before (STOLEN TOKEN DETECTION)

@@ -10,6 +10,9 @@ const StatusCode = {
         CREATED: 'Created!'
     }
 
+/**
+ * Base success response class
+ */
 class SuccessResponse {
     constructor({message, statusCode = StatusCode.OK, reasonStatusCode = ReasonStatusCode.OK, metadata = {}}){
         this.message = !message ? reasonStatusCode : message
@@ -24,12 +27,18 @@ class SuccessResponse {
 
 }
 
+/**
+ * 200 OK Response
+ */
 class OK extends SuccessResponse {
     constructor({message, metadata}){
         super({message, metadata})
     }
 }
 
+/**
+ * 201 Created Response
+ */
 class CREATED extends SuccessResponse {
     constructor({message, statusCode = StatusCode.CREATED, reasonStatusCode = ReasonStatusCode.CREATED, metadata}){
         super({message, statusCode, reasonStatusCode, metadata})

@@ -5,10 +5,15 @@ import { SOCKET_URL } from '../lib/socket';
 import { holdSeatsApi } from '../services/booking.api';
 import { useAuth } from '../contexts/AuthContext';
 
+/**
+ * SeatMap Component - Renders real-time seat selection grid
+ * @param {Object} props
+ * @param {Object} props.eventData - Full event details including zones and seats
+ * @returns {JSX.Element}
+ */
 export default function SeatMap({ eventData }) {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [realtimeLockedSeats, setRealtimeLockedSeats] = useState([]); // Locked seats by other users
-  const [socket, setSocket] = useState(null);
   const [soldSeats, setSoldSeats] = useState([]); // Recently sold seats by others
   const [isHolding, setIsHolding] = useState(false);
   const [error, setError] = useState('');
@@ -18,7 +23,7 @@ export default function SeatMap({ eventData }) {
   // REAL-TIME SOCKET.IO ENGINE
   useEffect(() => {
     const newSocket = io(SOCKET_URL, { transports: ['websocket'] });
-    setSocket(newSocket);
+
 
     // 2. Sync locked seats from Server on connection
     newSocket.on('sync_seats', (lockedList) => {

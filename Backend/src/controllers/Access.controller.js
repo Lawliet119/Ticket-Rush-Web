@@ -5,6 +5,12 @@ const { setRefreshTokenCookie } = require('../utils/authUtils')
 
 class AccessController {
 
+  /**
+   * Get current authenticated user info
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next function
+   */
   getMe = async (req, res, next) => {
     new OK({
       message: 'Get current user success',
@@ -18,6 +24,12 @@ class AccessController {
     }).send(res)
   }
     
+  /**
+   * Handle user login
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next function
+   */
   logIn = async (req, res, next) => {
     const result = await AccessService.logIn(req.body);
 
@@ -30,6 +42,12 @@ class AccessController {
     }).send(res)
   }
 
+  /**
+   * Handle user registration
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next function
+   */
   signUp = async (req, res, next) => {
     const result = await AccessService.signUp(req.body);
 
@@ -45,6 +63,12 @@ class AccessController {
     }).send(res)
   }
 
+  /**
+   * Handle user logout
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next function
+   */
   logout = async (req, res, next) => {
     const result = await AccessService.logout(req.userId);
     
@@ -57,6 +81,12 @@ class AccessController {
     }).send(res)
   }
 
+  /**
+   * Handle forgot password request
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next function
+   */
   forgotPassword = async (req, res, next) => {
     new OK({
         message: 'Password reset email sent!',
@@ -64,6 +94,12 @@ class AccessController {
     }).send(res)
   }
 
+  /**
+   * Handle password reset
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next function
+   */
   resetPassword = async (req, res, next) => {
     new OK({
         message: 'Password reset successfully!',
@@ -71,6 +107,12 @@ class AccessController {
     }).send(res)
   }
 
+  /**
+   * Handle token refresh using HttpOnly cookie
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next function
+   */
   handleRefreshToken = async (req, res, next) => {
     // 1. Read refresh token from HttpOnly cookie
     const refreshToken = req.cookies.refreshToken;

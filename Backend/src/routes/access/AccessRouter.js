@@ -3,7 +3,7 @@
 const express = require('express')
 const AccessController = require('../../controllers/Access.controller') 
 const router = express.Router()
-const asyncHandler = require('../../middleware/errorHandler')
+const asyncHandler = require('../../middleware/asyncHandler')
 
 const { authentication } = require('../../utils/authUtils')
 const { authLimiter } = require('../../middleware/rateLimiter')

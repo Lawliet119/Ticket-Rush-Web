@@ -4,10 +4,10 @@ const express = require('express')
 const BookingController = require('../../controllers/Booking.controller')
 const router = express.Router()
 const { authentication } = require('../../utils/authUtils')
-const asyncHandler = require('../../middleware/errorHandler')
+const asyncHandler = require('../../middleware/asyncHandler')
 
 // Authentication required for booking and viewing tickets
-router.use(authentication)
+router.use(asyncHandler(authentication))
 
 const { bookingLimiter } = require('../../middleware/rateLimiter')
 

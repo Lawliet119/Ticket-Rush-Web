@@ -18,10 +18,14 @@ const storage = new CloudinaryStorage({
 });
 
 
+/**
+ * Multer middleware configured for Cloudinary storage
+ * Handles file uploads and stores them in the 'ticketrush_events' folder
+ */
 const upload = multer({ 
     storage: storage,
     limits: {
-        fileSize: 5 * 1024 * 1024 // Limit 5MB
+        fileSize: 5 * 1024 * 1024 
     }
 });
 

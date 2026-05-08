@@ -4,12 +4,22 @@ const prisma = require('../config/prisma')
 
 class BookingRepository {
     
+    /**
+     * Atomically hold seats for a user with a duration
+     * @param {string} userId - User ID
+     * @param {string} eventId - Event ID
+     * @param {Array<string>} seatIds - List of seat IDs to lock
+     * @param {number} holdDurationSeconds - Duration of the lock in seconds
+     * @returns {Promise<Object>} Object with locked seats and expiry time
+     */
     static holdSeats = async (userId, eventId, seatIds, holdDurationSeconds = 30) => {
         return await prisma.$transaction(async (tx) => {
             const seats = await tx.$queryRaw`
-                SELECT id, status 
-                FROM seats 
-                WHERE id IN (${Prisma.join(seatIds)}) 
+                SELECT s.id, s.status 
+                FROM seats s
+                JOIN zones z ON s.zone_id = z.id
+                WHERE s.id IN (${Prisma.join(seatIds)})
+                AND z.event_id = ${eventId}::uuid
                 FOR UPDATE
             `;
 
@@ -41,6 +51,12 @@ class BookingRepository {
     }
 
     // Cancel/release held seats when user leaves Checkout page
+    /**
+     * Cancel held seats and release them back to AVAILABLE
+     * @param {string} userId - User ID
+     * @param {Array<string>} seatIds - List of seat IDs to release
+     * @returns {Promise<Object>} Released seats info
+     */
     static cancelHold = async (userId, seatIds) => {
         return await prisma.$transaction(async (tx) => {
             // Only delete locks that belong to this user
@@ -67,19 +83,27 @@ class BookingRepository {
     }
 
     // Create order and tickets from held seats
+    /**
+     * Process checkout: convert held seats into a paid order and tickets
+     * @param {string} userId - User ID
+     * @param {string} eventId - Event ID
+     * @param {Array<string>} seatIds - List of seat IDs to purchase
+     * @returns {Promise<Object>} Created order object
+     */
     static checkout = async (userId, eventId, seatIds) => {
         return await prisma.$transaction(async (tx) => {
-            // Get seat info for pricing
+            // Get seat info for pricing — verify seats belong to the specified event
             const seats = await tx.$queryRaw`
                 SELECT s.id, s.status, s.label as seat_label, z.name as zone_name, z.price 
                 FROM seats s
                 JOIN zones z ON s.zone_id = z.id
                 WHERE s.id IN (${Prisma.join(seatIds)})
+                AND z.event_id = ${eventId}::uuid
                 FOR UPDATE
             `;
 
             if (seats.length !== seatIds.length) {
-                throw new Error('Some seats do not exist.');
+                throw new Error('Some seats do not exist or do not belong to this event.');
             }
 
             // Check if seats are held by this user
@@ -156,6 +180,11 @@ class BookingRepository {
     }
 
     // Get list of tickets for User
+    /**
+     * Retrieve all tickets belonging to a user with related event and order info
+     * @param {string} userId - User ID
+     * @returns {Promise<Array>} List of tickets
+     */
     static getMyTickets = async (userId) => {
         // Get all tickets with event, order, and order_items
         return await prisma.tickets.findMany({
@@ -170,6 +199,37 @@ class BookingRepository {
             },
             orderBy: { created_at: 'desc' }
         });
+    }
+
+    // Clean up expired seat locks and release seats
+    /**
+     * Background task to release seats that have exceeded their hold time
+     * @returns {Promise<Array<string>>} List of released seat IDs
+     */
+    static cleanupExpiredSeatLocks = async () => {
+        const now = new Date();
+
+        // Find expired locks
+        const expiredLocks = await prisma.seat_locks.findMany({
+            where: { expires_at: { lt: now } }
+        });
+
+        if (expiredLocks.length === 0) return [];
+
+        const expiredSeatIds = expiredLocks.map(l => l.seat_id);
+
+        await prisma.$transaction(async (tx) => {
+            await tx.seat_locks.deleteMany({
+                where: { id: { in: expiredLocks.map(l => l.id) } }
+            });
+
+            await tx.seats.updateMany({
+                where: { id: { in: expiredSeatIds }, status: 'LOCKED' },
+                data: { status: 'AVAILABLE' }
+            });
+        });
+
+        return expiredSeatIds;
     }
 }
 

@@ -4,6 +4,13 @@ import { SOCKET_URL } from '../lib/socket';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
+/**
+ * WaitingRoom Component - Manages Virtual Queue state via Socket.io
+ * @param {Object} props
+ * @param {string} props.eventId - UUID of the event
+ * @param {Function} props.onPassed - Callback function when user is granted access
+ * @returns {JSX.Element|null}
+ */
 export default function WaitingRoom({ eventId, onPassed }) {
   const [position, setPosition] = useState(null);
   const [status, setStatus] = useState('CONNECTING'); // CONNECTING, WAITING, GRANTED

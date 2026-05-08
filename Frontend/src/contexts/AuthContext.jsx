@@ -3,6 +3,11 @@ import { getMeApi } from '../services/auth.api'
 
 const AuthContext = createContext()
 
+/**
+ * AuthProvider - Manages authentication state for the entire application
+ * @param {Object} props
+ * @param {any} props.children
+ */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -45,4 +50,8 @@ export function AuthProvider({ children }) {
   )
 }
 
+/**
+ * Custom hook to access authentication context
+ * @returns {Object} { user, loading, fetchUser }
+ */
 export const useAuth = () => useContext(AuthContext)

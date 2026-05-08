@@ -2,7 +2,7 @@
 const express = require('express')
 const UserController = require('../../controllers/User.controller')
 const router = express.Router()
-const asyncHandler = require('../../middleware/errorHandler')
+const asyncHandler = require('../../middleware/asyncHandler')
 const { authentication } = require('../../utils/authUtils')
 const upload = require('../../middleware/uploadHandler')
 

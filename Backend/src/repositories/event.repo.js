@@ -4,6 +4,11 @@ const prisma = require('../config/prisma')
 
 class EventRepository {
     
+    /**
+     * Create a new event with zones and seats in a transaction
+     * @param {Object} payload - Event and zone data
+     * @returns {Promise<Object>} Created event object
+     */
     static createEvent = async ({ 
         title, description, venue, address, event_date, 
         event_end_date, sale_start_at, sale_end_at, created_by, zones, banner_url 
@@ -79,6 +84,14 @@ class EventRepository {
         })
     }
 
+    /**
+     * Retrieve all events with pagination and status filter
+     * @param {Object} params - Query parameters
+     * @param {number} params.limit - Max items to return
+     * @param {number} params.offset - Number of items to skip
+     * @param {string} params.status - Event status filter
+     * @returns {Promise<Array>} List of events
+     */
     static findAllEvents = async ({ limit, offset, status }) => {
         return await prisma.events.findMany({
             where: status ? { status } : {},
@@ -91,6 +104,11 @@ class EventRepository {
         })
     }
 
+    /**
+     * Find a single event by ID with all zones and seats included
+     * @param {string} id - Event ID
+     * @returns {Promise<Object>} Event detail object
+     */
     static findEventById = async (id) => {
         const event = await prisma.events.findUnique({
             where: { id },
@@ -122,6 +140,12 @@ class EventRepository {
         return event;
     }
 
+    /**
+     * Update an event's basic information
+     * @param {string} id - Event ID
+     * @param {Object} payload - Update data
+     * @returns {Promise<Object>} Updated event object
+     */
     static updateEvent = async (id, payload) => {
         return await prisma.events.update({
             where: { id },
@@ -129,6 +153,11 @@ class EventRepository {
         })
     }
 
+    /**
+     * Delete an event and all its related data (orders, tickets, etc.)
+     * @param {string} id - Event ID
+     * @returns {Promise<Object>} Deletion result
+     */
     static deleteEvent = async (id) => {
         return await prisma.$transaction(async (tx) => {
             // Get all orders belonging to this event
