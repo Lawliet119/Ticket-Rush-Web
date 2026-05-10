@@ -242,23 +242,3 @@ VITE_SOCKET_URL=http://localhost:3000
   * Tách queue worker thành service riêng
   * Thêm cache read-heavy cho event catalog
   * Bổ sung monitor/log tracing
-
-## 13) Kịch bản demo nhanh (để vấn đáp)
-
-1. Đăng nhập admin -> tạo event + zone ghế.
-2. Đăng nhập customer -> vào event detail, mở 2 trình duyệt để test tranh chấp ghế.
-3. Chọn cùng 1 ghế trên 2 client -> chỉ 1 bên hold thành công.
-4. Test hold timeout -> đợi quá hạn, ghế tự mở lại.
-5. Bật queue (hoặc giảm `MAX_ACTIVE_USERS`) -> mở nhiều client và quan sát vị trí queue.
-6. Checkout thành công -> kiểm tra My Tickets + QR.
-7. Vào dashboard admin -> xem thống kê doanh thu/lấp đầy.
-
-## 14) Ghi chú
-
-* Đây là bản README tổng hợp phù hợp mục tiêu báo cáo/vấn đáp.
-* Nếu cần nộp production, nên bổ sung:
-
-  * Ảnh chụp giao diện
-  * API examples (request/response)
-  * Mô tả test cases và metrics tải
-  * Link deploy/CI
