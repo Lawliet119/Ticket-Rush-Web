@@ -21,6 +21,21 @@ export const loginApi = async (payload) => {
 }
 
 /**
+ * Verify email using token from link
+ */
+export const verifyEmailApi = async (token) => {
+  const res = await http.get(`/verify-email/${token}`)
+  return res.data
+}
+
+export const resendVerificationApi = async (email) => {
+  const res = await http.post('/resend-verification', { email })
+  return res.data
+}
+
+
+
+/**
  * Request password reset email
  * @param {Object} payload - { email }
  * @returns {Promise<Object>} API response

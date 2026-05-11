@@ -1,13 +1,16 @@
 'use strict'
+
 const express = require('express')
 const UserController = require('../../controllers/User.controller')
 const router = express.Router()
 const asyncHandler = require('../../middleware/asyncHandler')
-const { authentication } = require('../../utils/authUtils')
-const upload = require('../../middleware/uploadHandler')
+const { authentication } = require('../../middleware/auth.middleware')
 
 router.use(asyncHandler(authentication))
-router.get('/profile', asyncHandler(UserController.getProfile))
-router.put('/profile', upload.single('avatar'), asyncHandler(UserController.updateProfile))
+
+router.get('/', asyncHandler(UserController.getAllUsers))
+router.get('/:id', asyncHandler(UserController.getUserById))
+router.put('/:id', asyncHandler(UserController.updateUser))
+router.delete('/:id', asyncHandler(UserController.deleteUser))
 
 module.exports = router

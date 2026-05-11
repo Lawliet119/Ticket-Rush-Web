@@ -51,14 +51,8 @@ class AccessController {
   signUp = async (req, res, next) => {
     const result = await AccessService.signUp(req.body);
 
-    // Set HttpOnly Cookie
-    setRefreshTokenCookie(res, result.tokens.refreshToken);
-
-    // Remove refreshToken from the body sent to frontend
-    delete result.tokens.refreshToken;
-
     new CREATED({
-      message: 'Registered OK!',
+      message: result.message || 'Registered OK!',
       metadata: result
     }).send(res)
   }
@@ -135,6 +129,24 @@ class AccessController {
       }
     }).send(res)
   }
+
+  /**
+   * Handle email verification
+   */
+  verifyEmail = async (req, res, next) => {
+    new OK({
+      message: 'Email verified successfully!',
+      metadata: await AccessService.verifyEmail(req.params.token)
+    }).send(res)
+  }
+
+  resendVerification = async (req, res, next) => {
+    new OK({
+      message: 'Verification email resent!',
+      metadata: await AccessService.resendVerification(req.body.email)
+    }).send(res)
+  }
+
 
 }
 

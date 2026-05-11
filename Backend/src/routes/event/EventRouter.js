@@ -3,20 +3,20 @@
 const express = require('express')
 const EventController = require('../../controllers/Event.controller')
 const router = express.Router()
-const { authentication, checkRole } = require('../../utils/authUtils')
 const asyncHandler = require('../../middleware/asyncHandler')
+const { authentication, checkRole } = require('../../middleware/auth.middleware')
 const upload = require('../../middleware/uploadHandler')
 
 // Public routes
-router.get('', asyncHandler(EventController.getAllEvents))
-router.get('/:id', asyncHandler(EventController.getEventDetail))
+router.get('/', asyncHandler(EventController.getAllEvents))
+router.get('/:id', asyncHandler(EventController.getEventById))
 
-// Authentication required
+// Protected routes (Admin only)
 router.use(asyncHandler(authentication))
+router.use(checkRole(['ADMIN']))
 
-// Admin routes
-router.post('/create', checkRole(['ADMIN']), upload.single('banner'), asyncHandler(EventController.createEvent))
-router.put('/update/:id', checkRole(['ADMIN']), upload.single('banner'), asyncHandler(EventController.updateEvent))
-router.delete('/delete/:id', checkRole(['ADMIN']), asyncHandler(EventController.deleteEvent))
+router.post('/', upload.single('image'), asyncHandler(EventController.createEvent))
+router.put('/:id', upload.single('image'), asyncHandler(EventController.updateEvent))
+router.delete('/:id', asyncHandler(EventController.deleteEvent))
 
 module.exports = router

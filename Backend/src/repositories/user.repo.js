@@ -102,18 +102,53 @@ const getUserProfile = async (userId) => {
     });
 }
 
-/**
- * Update user profile fields
- * @param {string} userId - User ID
- * @param {Object} updateData - Data to update
- * @returns {Promise<Object>} Updated profile
- */
 const updateUserProfile = async (userId, updateData) => {
     return await prisma.users.update({
         where: { id: userId },
         data: updateData,
         select: USER_SELECT_FIELDS
     });
+}
+
+/**
+ * Find user by verification token
+ */
+const findUserByVerificationToken = async (token) => {
+    return await prisma.users.findFirst({
+        where: {
+            verification_token: token,
+            verification_expires: {
+                gt: new Date()
+            }
+        }
+    })
+}
+
+/**
+ * Mark user as verified and active
+ */
+const verifyUser = async (userId) => {
+    return await prisma.users.update({
+        where: { id: userId },
+        data: {
+            is_active: true,
+            verification_token: null,
+            verification_expires: null
+        }
+    })
+}
+
+/**
+ * Update user's verification token and expiry
+ */
+const updateVerificationToken = async (email, token, expires) => {
+    return await prisma.users.update({
+        where: { email },
+        data: {
+            verification_token: token,
+            verification_expires: expires
+        }
+    })
 }
 
 module.exports = {
@@ -124,5 +159,9 @@ module.exports = {
     findUserByResetToken,
     updatePassword,
     getUserProfile,
-    updateUserProfile
+    updateUserProfile,
+    findUserByVerificationToken,
+    verifyUser,
+    updateVerificationToken
 }
+

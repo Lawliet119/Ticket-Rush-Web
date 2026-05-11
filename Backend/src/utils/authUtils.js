@@ -1,13 +1,10 @@
 'use strict'
 const JWT = require('jsonwebtoken')
-const { AuthFailureError, NotFoundError, ForbiddenError } = require('../core/error.response')
-const { findUserById } = require('../repositories/user.repo')
 
-const HEADER = {
-    API_KEY: 'x-api-key',
-    CLIENT_ID: 'x-client-id',
-    AUTHORIZATION: 'authorization'
-}
+/**
+ * Auth Utilities
+ * Contains helper functions for token generation and management.
+ */
 
 /**
  * Create a pair of Access Token and Refresh Token
@@ -39,63 +36,7 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
 }
 
 /**
- * Authentication middleware to verify user tokens
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next function
- */
-const authentication = async (req, res, next) => {
-    // 1. Check userId
-    const userId = req.headers[HEADER.CLIENT_ID]
-    if (!userId) throw new AuthFailureError('Invalid Request')
-
-    // 2. Lookup keyStore
-    const KeyTokenService = require('../services/keyToken.service')
-    const keyStore = await KeyTokenService.findByUserId(userId)
-    if (!keyStore) throw new NotFoundError('Not found keyStore')
-
-    // 3. Get AccessToken
-    const accessToken = req.headers[HEADER.AUTHORIZATION]
-    if (!accessToken) throw new AuthFailureError('Invalid Request')
-
-    // 4. Verify token
-    try {
-        const decodeUser = JWT.verify(accessToken, keyStore.public_key, { algorithms: ['RS256'] })
-        
-        // userId check
-        if (userId !== decodeUser.userId) throw new AuthFailureError('Invalid User ID')
-
-        // 5. Fetch user from DB to get latest role
-        const user = await findUserById(userId)
-        if (!user) throw new NotFoundError('User not found')
-
-        // attach objects into req
-        req.keyStore = keyStore
-        req.user = user // Now contains role
-        req.userId = userId
-
-        return next()
-    } catch (error) {
-        throw new AuthFailureError('Invalid Token')
-    }
-}
-
-/**
- * Middleware to check if user has required roles
- * @param {Array<string>} roles - List of allowed roles
- * @returns {Function} Middleware function
- */
-const checkRole = (roles = []) => {
-    return (req, res, next) => {
-        if (!req.user || !roles.includes(req.user.role)) {
-            throw new ForbiddenError('You do not have permission to perform this action')
-        }
-        next()
-    }
-}
-
-/**
- * Set refresh token as an HTTP-only cookie
+ * Set refresh token as an HTTP-only cookie for secure persistence
  * @param {Object} res - Express response object
  * @param {string} refreshToken - The refresh token string
  */
@@ -104,13 +45,11 @@ const setRefreshTokenCookie = (res, refreshToken) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     })
 }
 
 module.exports = {
     createTokenPair,
-    authentication,
-    checkRole,
     setRefreshTokenCookie
 }

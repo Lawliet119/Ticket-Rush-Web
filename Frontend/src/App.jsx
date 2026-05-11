@@ -10,6 +10,8 @@ import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home'; 
 import CreateEvent from './pages/CreateEvent';
 import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
+
 
 // Import additional pages
 import MyTicketsPage from './pages/MyTicketsPage';
@@ -31,6 +33,7 @@ function App() {
         <Route path="/signup" element={<CustomerLayout><SignUp /></CustomerLayout>} />
         <Route path="/forgot-password" element={<CustomerLayout><ForgotPassword /></CustomerLayout>} />
         <Route path="/reset-password/:token" element={<CustomerLayout><ResetPassword /></CustomerLayout>} />
+        <Route path="/verify-email/:token" element={<CustomerLayout><VerifyEmail /></CustomerLayout>} />
         <Route path="/home" element={<CustomerLayout><Home /></CustomerLayout>} />
         
         <Route path="/events/:id" element={

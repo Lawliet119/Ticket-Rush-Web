@@ -1,25 +1,24 @@
 'use strict'
 
-// PHẢI CÓ DÒNG NÀY để thư viện hoạt động
 const rateLimit = require('express-rate-limit');
 
 /**
- * Global Rate Limiter: Nới lỏng lên 1000 requests/15p để demo mượt mà.
+ * Global Rate Limiter: Protects the entire API from general flooding.
  */
 const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, 
-    max: 1000, 
+    windowMs: 15 * 60 * 1000,
+    max: 500,
     message: {
         status: 'error',
         code: 429,
-        message: 'Hệ thống nhận thấy quá nhiều yêu cầu từ IP của bạn.'
+        message: 'Too many requests from this IP, please try again after 15 minutes.'
     },
     standardHeaders: true, 
     legacyHeaders: false, 
 });
 
 /**
- * Auth Limiter: Cho phép thử 100 lần (thay vì 10) để thoải mái test login.
+ * Auth Limiter: Stricter limit for authentication routes (Login/Signup/Forgot Password).
  */
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -27,14 +26,14 @@ const authLimiter = rateLimit({
     message: {
         status: 'error',
         code: 429,
-        message: 'Thử đăng nhập quá nhiều lần. Vui lòng đợi một lát.'
+        message: 'Too many authentication attempts, please try again after 15 minutes.'
     },
     standardHeaders: true,
     legacyHeaders: false,
 });
 
 /**
- * Booking Limiter: Cho phép 200 thao tác đặt vé / 15 phút.
+ * Booking Limiter: Prevents bot spamming on sensitive booking routes.
  */
 const bookingLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -42,7 +41,7 @@ const bookingLimiter = rateLimit({
     message: {
         status: 'error',
         code: 429,
-        message: 'Thao tác đặt vé quá nhanh.'
+        message: 'Booking operations are too frequent, please try again after 15 minutes.'
     },
     standardHeaders: true,
     legacyHeaders: false,

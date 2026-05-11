@@ -1,14 +1,15 @@
-'use strict';
-const express = require('express');
-const router = express.Router();
-const DashboardController = require('../../controllers/Dashboard.controller');
-const { authentication, checkRole } = require('../../utils/authUtils');
-const asyncHandler = require('../../middleware/asyncHandler');
+'use strict'
 
-// Authentication required
-router.use(asyncHandler(authentication));
+const express = require('express')
+const DashboardController = require('../../controllers/Dashboard.controller')
+const router = express.Router()
+const asyncHandler = require('../../middleware/asyncHandler')
+const { authentication, checkRole } = require('../../middleware/auth.middleware')
 
-// Only Admin can view dashboard statistics
-router.get('/stats', checkRole(['ADMIN']), asyncHandler(DashboardController.getDashboardStats));
+router.use(asyncHandler(authentication))
+router.use(checkRole(['ADMIN']))
 
-module.exports = router;
+router.get('/stats', asyncHandler(DashboardController.getStats))
+router.get('/recent-bookings', asyncHandler(DashboardController.getRecentBookings))
+
+module.exports = router

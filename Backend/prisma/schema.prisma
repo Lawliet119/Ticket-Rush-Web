@@ -151,7 +151,9 @@ model users {
   age           Int?
   phone         String?        @db.VarChar(20)
   avatar_url    String?        @db.VarChar(500)
-  is_active             Boolean        @default(true)
+  is_active             Boolean        @default(false)
+  verification_token    String?        @db.VarChar(255)
+  verification_expires  DateTime?      @db.Timestamptz(6)
   password_reset_token  String?        @db.VarChar(255)
   password_reset_expires DateTime?     @db.Timestamptz(6)
   created_at            DateTime       @default(now()) @db.Timestamptz(6)

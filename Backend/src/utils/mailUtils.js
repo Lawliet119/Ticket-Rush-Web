@@ -10,7 +10,7 @@ const nodemailer = require('nodemailer')
  * @param {string} options.html - Email HTML content
  * @returns {Promise<Object>} Mail information
  */
-const sendEmail = async ({ email, subject, html }) => {
+const sendEmail = async ({ email, subject, html, text }) => {
     
     const transporter = nodemailer.createTransport({
         host: process.env.MAIL_HOST || "smtp.mailtrap.io",
@@ -26,7 +26,8 @@ const sendEmail = async ({ email, subject, html }) => {
         from: '"TicketRush Support" <support@ticketrush.com>',
         to: email,
         subject: subject,
-        html: html
+        html: html,
+        text: text
     }
 
     

@@ -2,14 +2,20 @@
 
     const StatusCode = {
         BAD_REQUEST: 400,
+        UNAUTHORIZED: 401,
         FORBIDDEN: 403,
-        CONFLICT: 409
+        NOT_FOUND: 404,
+        CONFLICT: 409,
+        TOO_MANY_REQUESTS: 429
     }
 
     const ReasonStatusCode = {
         BAD_REQUEST: 'Bad request error',
+        UNAUTHORIZED: 'Unauthorized',
         FORBIDDEN: 'Forbidden',
-        CONFLICT: 'Conflict error'
+        NOT_FOUND: 'Not Found',
+        CONFLICT: 'Conflict error',
+        TOO_MANY_REQUESTS: 'Too many requests'
     }
 
    
@@ -70,10 +76,20 @@
         }
     }
 
+    /**
+     * Error for 429 Too Many Requests
+     */
+    class TooManyRequestsError extends ErrorResponse {
+        constructor(message = ReasonStatusCode.TOO_MANY_REQUESTS, statusCode = StatusCode.TOO_MANY_REQUESTS) {
+            super(message, statusCode)
+        }
+    }
+
     module.exports = {
         ConflictRequestError,
         BadRequestError,
         AuthFailureError,
         NotFoundError,
-        ForbiddenError
+        ForbiddenError,
+        TooManyRequestsError
     }

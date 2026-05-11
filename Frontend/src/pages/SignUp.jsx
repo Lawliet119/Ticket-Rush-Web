@@ -13,25 +13,29 @@ export default function SignUp() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
   const navigate = useNavigate()
 
   const onChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
+
   // Handle form submission
   const onSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setSuccessMsg('')
 
     try {
+      // Call Signup API
       const data = await signupApi(form)
-      // Save token to localStorage and redirect to /home
-      localStorage.setItem('accessToken', data.metadata.tokens.accessToken)
-      localStorage.setItem('userId', data.metadata.user.id)
       
-      await fetchUser();
-      navigate('/home')
+      setSuccessMsg(data.message || 'Registration success! Please check your email to verify your account.')
+      
+      // Clear form
+      setForm({ name: '', email: '', password: '' })
+
     } catch (err) {
       setError(
         err?.response?.data?.message ||
@@ -83,6 +87,7 @@ export default function SignUp() {
       </form>
 
       {error && <div className="mt-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg">{error}</div>}
+      {successMsg && <div className="mt-4 p-3 bg-green-50 text-green-700 border border-green-200 rounded-lg">{successMsg}</div>}
     </div>
   )
 }
