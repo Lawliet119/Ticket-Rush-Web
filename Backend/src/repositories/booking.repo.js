@@ -147,7 +147,7 @@ class BookingRepository {
                     order_code: orderCode,
                     total_amount: totalAmount,
                     status: 'PAID',
-                    expires_at: new Date(Date.now() + 10 * 60000), // Not important because already PAID
+                    expires_at: new Date(Date.now() + 10 * 60000), 
                     paid_at: new Date()
                 }
             });

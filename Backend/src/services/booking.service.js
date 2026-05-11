@@ -26,7 +26,7 @@ class BookingService {
 
         try {
             // Hold seats for 10 minutes (600 seconds)
-            const result = await BookingRepository.holdSeats(userId, eventId, seatIds, 600);
+            const result = await BookingRepository.holdSeats(userId, eventId, seatIds,10);
             
             // Broadcast signal to all other clients that seats are locked
             seatIds.forEach(id => {

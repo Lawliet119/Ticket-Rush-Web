@@ -11,6 +11,6 @@ router.use('/v1/api/booking', require('./booking/BookingRouter'))
 router.use('/v1/api',require('./access/AccessRouter'))
 router.use('/v1/api/dashboard', require('./dashboard/DashboardRouter'));
 router.use('/v1/api/users', require('./user/UserRouter'));
-
+router.use('/v1/api/queue', require('./queue/QueueRouter'));
 
 module.exports = router

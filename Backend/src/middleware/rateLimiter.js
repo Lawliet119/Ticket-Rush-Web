@@ -1,59 +1,55 @@
 'use strict'
-const rateLimit = require('express-rate-limit')
 
-// Global limiter: 100 requests per 15 minutes per IP
+// PHẢI CÓ DÒNG NÀY để thư viện hoạt động
+const rateLimit = require('express-rate-limit');
+
 /**
- * Global rate limiter to protect the API from general flooding
- * 100 requests per 15 minutes per IP
+ * Global Rate Limiter: Nới lỏng lên 1000 requests/15p để demo mượt mà.
  */
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
-    max: 100, 
+    max: 1000, 
     message: {
         status: 'error',
         code: 429,
-        message: 'Too many requests from this IP, please try again after 15 minutes'
+        message: 'Hệ thống nhận thấy quá nhiều yêu cầu từ IP của bạn.'
     },
     standardHeaders: true, 
     legacyHeaders: false, 
-})
+});
 
-// Auth limiter: 10 requests per 15 minutes per IP (Stricter for brute force/spam)
 /**
- * Stricter rate limiter for authentication routes (Login/Signup/Forgot Password)
- * 10 requests per 15 minutes per IP
+ * Auth Limiter: Cho phép thử 100 lần (thay vì 10) để thoải mái test login.
  */
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: 100,
     message: {
         status: 'error',
         code: 429,
-        message: 'Too many authentication attempts, please try again after 15 minutes'
+        message: 'Thử đăng nhập quá nhiều lần. Vui lòng đợi một lát.'
     },
     standardHeaders: true,
     legacyHeaders: false,
-})
+});
 
-// Booking limiter: 20 requests per 15 minutes per IP (To prevent bot booking)
 /**
- * Rate limiter for sensitive booking routes to prevent bot spam
- * 20 requests per 15 minutes per IP
+ * Booking Limiter: Cho phép 200 thao tác đặt vé / 15 phút.
  */
 const bookingLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20,
+    max: 200,
     message: {
         status: 'error',
         code: 429,
-        message: 'Too many booking attempts, please try again after 15 minutes'
+        message: 'Thao tác đặt vé quá nhanh.'
     },
     standardHeaders: true,
     legacyHeaders: false,
-})
+});
 
 module.exports = {
     globalLimiter,
     authLimiter,
     bookingLimiter
-}
+};

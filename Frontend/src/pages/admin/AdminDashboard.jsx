@@ -155,14 +155,14 @@ export default function AdminDashboard() {
 
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold mb-6">Event Occupancy Rate</h2>
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[250px] overflow-y-auto pr-2">
               {!statsData.eventOccupancy || statsData.eventOccupancy.length === 0 ? (
                 <p className="text-gray-400 text-sm text-center py-10">No events have been created yet.</p>
               ) : (
                 statsData.eventOccupancy.map((event) => {
                   const percentage = event.total > 0 ? (event.occupancy / event.total) * 100 : 0;
                   return (
-                    <div key={event.event}>
+                    <div key={event.event} className="pb-2 border-b border-gray-100 last:border-0">
                       <div className="flex justify-between text-sm mb-2">
                         <span className="font-medium truncate pr-2 w-3/5" title={event.event}>{event.event}</span>
                         <span className="text-gray-600 shrink-0 font-bold">{event.occupancy}/{event.total} ({percentage.toFixed(0)}%)</span>

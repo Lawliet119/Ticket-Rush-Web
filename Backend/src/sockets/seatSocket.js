@@ -1,77 +1,49 @@
 'use strict';
 
-
-const lockedSeats = new Set();
+const QueueService = require('../services/queue.service');
 
 /**
- * Socket.io handlers for real-time seat selection and virtual queue
- * @param {Object} io - Socket.io server instance
+ * Socket.io handlers for Seat Map and Virtual Queue
  */
 module.exports = (io) => {
     io.on('connection', (socket) => {
-        console.log(`[Socket] Client connected: ${socket.id}`);
-
-       
-        socket.emit('sync_seats', Array.from(lockedSeats));
-
         
-        socket.on('toggle_seat', (seatId, isLocking) => {
-            if (isLocking) {
-                lockedSeats.add(seatId);
-            } else {
-                lockedSeats.delete(seatId);
-            }
-
-            socket.broadcast.emit('seat_updated', seatId, isLocking);
-        });
-
-        // VIRTUAL QUEUE HANDLERS
+        // Handle user joining the queue
         socket.on('join_queue', async (eventId, userId) => {
             try {
-                // Attach info to socket for disconnect cleanup
-                socket.eventId = eventId;
-                socket.userId = userId;
-
-                const QueueService = require('../services/queue.service');
                 const result = await QueueService.joinQueue(eventId, userId, socket.id);
+                
                 if (result.status === 'GRANTED') {
                     socket.emit('queue_passed', { token: result.token });
                 } else {
                     socket.emit('queue_position', { position: result.position });
                 }
             } catch (error) {
-                console.error('[Socket] join_queue error:', error);
+                console.error('[Socket] Error in join_queue:', error);
             }
         });
 
-        socket.on('leave_queue', async (eventId, userId) => {
+        // Handle manual or automatic position updates
+        socket.on('request_position', async (eventId, userId) => {
             try {
-                const QueueService = require('../services/queue.service');
-                await QueueService.removeFromActive(eventId, userId);
+                const status = await QueueService.checkStatus(eventId, userId);
+                if (status.status === 'GRANTED') {
+                    socket.emit('queue_passed', { token: status.token });
+                } else if (status.status === 'WAITING') {
+                    socket.emit('queue_position', { position: status.position });
+                }
             } catch (error) {
-                console.error('[Socket] leave_queue error:', error);
+                console.error('[Socket] Error in request_position:', error);
             }
         });
 
-        socket.on('register_seatmap', (eventId, userId) => {
-            socket.eventId = eventId;
-            socket.userId = userId;
-        });
-
-        socket.on('transitioning_to_seatmap', () => {
-            socket.transitioning = true;
+        // Handle user leaving the queue/seatmap area
+        socket.on('leave_queue', async (eventId, userId) => {
+            await QueueService.removeFromActive(eventId, userId);
         });
 
         socket.on('disconnect', async () => {
-            console.log(`[Socket] Client disconnected: ${socket.id}`);
-            if (socket.eventId && socket.userId && !socket.transitioning) {
-                try {
-                    const QueueService = require('../services/queue.service');
-                    await QueueService.removeFromActive(socket.eventId, socket.userId);
-                } catch (error) {
-                    console.error('[Socket] disconnect cleanup error:', error);
-                }
-            }
+            // Cleanup logic is managed by session tokens and timeouts
         });
     });
 };

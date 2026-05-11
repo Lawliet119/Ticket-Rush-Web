@@ -50,12 +50,12 @@ class DashboardRepo {
     }
 
     /**
-     * Get the 5 most recently created events with their occupancy data
+     * Get the 20 most recently created events with their occupancy data
      * @returns {Promise<Array>} List of events with occupancy stats
      */
     static getRecentEvents = async () => {
         const events = await prisma.events.findMany({
-            take: 5, orderBy: { created_at: 'desc' },
+            take: 20, orderBy: { created_at: 'desc' },
             where: { total_seats: { gt: 0 } },
             select: { id: true, title: true, total_seats: true, available_seats: true }
         });

@@ -44,14 +44,14 @@ class DashboardService {
             value: g._count.gender
         }));
 
-        let ageDemographics = { '18-24': 0, '25-34': 0, '35-44': 0, '45+': 0 };
+        let ageDemographics = { '16-18': 0, '18-22': 0, '22-30': 0, '30+': 0 };
         
         usersWithAge.forEach(user => {
             const age = user.age;
-            if (age >= 18 && age <= 24) ageDemographics['18-24']++;
-            else if (age >= 25 && age <= 34) ageDemographics['25-34']++;
-            else if (age >= 35 && age <= 44) ageDemographics['35-44']++;
-            else if (age >= 45) ageDemographics['45+']++;
+            if (age >= 16 && age <= 18) ageDemographics['16-18']++;
+            else if (age >= 18 && age <= 22) ageDemographics['18-22']++;
+            else if (age >= 22 && age <= 30) ageDemographics['22-30']++;
+            else if (age >= 30) ageDemographics['30+']++;
         });
 
         const demographicsData = Object.keys(ageDemographics).map(key => ({

@@ -1,47 +1,60 @@
-'use strict'
+'use strict';
+
 const cron = require('node-cron');
 const BookingRepository = require('../repositories/booking.repo');
+const QueueService = require('./queue.service');
+const redis = require('../config/redis');
 
+/**
+ * Service to manage scheduled background tasks.
+ */
 class CronService {
+    
     /**
-     * Initialize background jobs (Cron and Interval tasks)
-     * @param {Object} io - Socket.io instance for broadcasting events
+     * Initialize background jobs
+     * @param {Object} io - Socket.io instance for real-time broadcasts
      */
     static init(io) {
-        // Run every 30 seconds to clean up expired seat locks
+        
+        // Task 1: Cleanup expired seat locks every 30 seconds
         cron.schedule('*/30 * * * * *', async () => {
             try {
                 const releasedSeatIds = await BookingRepository.cleanupExpiredSeatLocks();
-
                 if (releasedSeatIds.length > 0) {
                     releasedSeatIds.forEach(seatId => {
                         io.emit('seat_updated', seatId, false);
                     });
-
-                    console.log(`[Cron] Released ${releasedSeatIds.length} expired seats.`);
+                    console.log(`[Cron] Successfully released ${releasedSeatIds.length} expired seat(s).`);
                 }
             } catch (error) {
-                console.error('[Cron] Error scanning expired seats:', error);
+                console.error('[Cron] Error releasing seats:', error);
             }
         });
 
-        // Run every 2 seconds to process the Virtual Queue
+        // Task 2: Process Virtual Queue batches every 2 seconds
         setInterval(async () => {
             try {
-                const QueueService = require('./queue.service');
-                const redis = require('../config/redis');
+                let cursor = '0';
+                const queueKeys = new Set();
+
+                // Non-blocking scan to find all active queues
+                do {
+                    const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', 'queue:*', 'COUNT', 100);
+                    cursor = nextCursor;
+                    keys.forEach(k => queueKeys.add(k));
+                } while (cursor !== '0');
                 
-                // Get all active events that have a queue
-                const keys = await redis.keys('queue:*');
-                const eventIds = keys.map(k => k.split(':')[1]);
+                const eventIds = Array.from(queueKeys).map(k => k.split(':')[1]);
                 
                 for (let eventId of eventIds) {
                     await QueueService.processQueue(eventId);
                 }
             } catch (error) {
-                console.error('[QueueProcessor] Error:', error);
+                console.error('[QueueProcessor] Error processing queue:', error);
             }
         }, 2000);
+
+        console.log('[CronService] Background tasks are active.');
     }
 }
 
