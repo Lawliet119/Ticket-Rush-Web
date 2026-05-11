@@ -10,7 +10,6 @@ export const options = {
   duration: '30s', 
 };
 
-// Replace this with a valid event UUID from your database
 const EVENT_ID = '6c88a7c8-0b98-415b-beda-b4ae93c05a14';
 
 export default function () {
