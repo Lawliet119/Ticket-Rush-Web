@@ -9,7 +9,7 @@ const { authentication, checkRole } = require('../../middleware/auth.middleware'
 router.use(asyncHandler(authentication))
 router.use(checkRole(['ADMIN']))
 
-router.get('/stats', asyncHandler(DashboardController.getStats))
-router.get('/recent-bookings', asyncHandler(DashboardController.getRecentBookings))
+router.get('/stats', asyncHandler(DashboardController.getDashboardStats))
+// router.get('/recent-bookings', asyncHandler(DashboardController.getRecentBookings))
 
 module.exports = router

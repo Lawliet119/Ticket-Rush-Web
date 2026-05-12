@@ -9,14 +9,14 @@ const upload = require('../../middleware/uploadHandler')
 
 // Public routes
 router.get('/', asyncHandler(EventController.getAllEvents))
-router.get('/:id', asyncHandler(EventController.getEventById))
+router.get('/:id', asyncHandler(EventController.getEventDetail))
 
 // Protected routes (Admin only)
 router.use(asyncHandler(authentication))
 router.use(checkRole(['ADMIN']))
 
-router.post('/', upload.single('image'), asyncHandler(EventController.createEvent))
-router.put('/:id', upload.single('image'), asyncHandler(EventController.updateEvent))
-router.delete('/:id', asyncHandler(EventController.deleteEvent))
+router.post('/create', upload.single('image'), asyncHandler(EventController.createEvent))
+router.put('/update/:id', upload.single('image'), asyncHandler(EventController.updateEvent))
+router.delete('/delete/:id', asyncHandler(EventController.deleteEvent))
 
 module.exports = router
