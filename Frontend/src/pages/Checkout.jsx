@@ -121,6 +121,7 @@ export default function Checkout() {
         seatIds: selectedSeats.map(s => s.id)
       };
       await checkoutApi(payload);
+      localStorage.removeItem(`booking_token_${eventData.id}`);
       isSuccessRef.current = true; // Prevent cleanup from releasing seats
       setIsSuccess(true);
     } catch (err) {

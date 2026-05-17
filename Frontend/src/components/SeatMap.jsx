@@ -59,9 +59,6 @@ export default function SeatMap({ eventData }) {
 
     // Disconnect on unmount
     return () => {
-      if (user && eventData && eventData.id) {
-        newSocket.emit('leave_queue', eventData.id, user.id);
-      }
       newSocket.disconnect();
     };
   }, [eventData, user]);
