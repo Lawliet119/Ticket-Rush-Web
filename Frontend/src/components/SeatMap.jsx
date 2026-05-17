@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { SOCKET_URL } from '../lib/socket';
@@ -17,6 +17,7 @@ export default function SeatMap({ eventData }) {
   const [soldSeats, setSoldSeats] = useState([]); // Recently sold seats by others
   const [isHolding, setIsHolding] = useState(false);
   const [error, setError] = useState('');
+  const isNavigatingToCheckoutRef = useRef(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -59,6 +60,10 @@ export default function SeatMap({ eventData }) {
 
     // Disconnect on unmount
     return () => {
+      // Keep queue slot when transitioning to Checkout, otherwise release immediately.
+      if (!isNavigatingToCheckoutRef.current && user && eventData && eventData.id) {
+        newSocket.emit('leave_queue', eventData.id, user.id);
+      }
       newSocket.disconnect();
     };
   }, [eventData, user]);
@@ -206,6 +211,7 @@ export default function SeatMap({ eventData }) {
                   eventId: eventData.id,
                   seatIds: selectedSeats.map(s => s.id)
                 });
+                isNavigatingToCheckoutRef.current = true;
                 // Redirect to Checkout with real expiration time from Backend
                 navigate('/checkout', { 
                   state: { 
