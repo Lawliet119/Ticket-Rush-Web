@@ -2,11 +2,15 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { io } from 'socket.io-client';
+import { SOCKET_URL } from '../lib/socket';
 import { checkoutApi, cancelHoldApi } from '../services/booking.api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const { selectedSeats, totalPrice, eventData, expiresAt } = location.state || { selectedSeats: [], totalPrice: 0, eventData: null, expiresAt: null };
   
@@ -26,6 +30,7 @@ export default function Checkout() {
   const isSuccessRef = useRef(false);
   const seatIdsRef = useRef(selectedSeats.map(s => s.id));
   const releaseTimeoutRef = useRef(null);
+  const socketRef = useRef(null);
 
   // Release seats function
   const releaseSeats = useCallback(async () => {
@@ -82,6 +87,23 @@ export default function Checkout() {
       }, 100);
     };
   }, [navigate, selectedSeats, releaseSeats]);
+
+  // EFFECT 1.5: Socket.IO for queue management (emit leave_queue on unmount)
+  useEffect(() => {
+    if (!user || !eventData || selectedSeats.length === 0) return;
+
+    const newSocket = io(SOCKET_URL, { transports: ['websocket'] });
+    socketRef.current = newSocket;
+
+    return () => {
+      // Emit leave_queue ONLY if checkout not completed
+      // This releases the queue slot when user leaves Checkout without paying
+      if (!isSuccessRef.current && user && eventData) {
+        newSocket.emit('leave_queue', eventData.id, user.id);
+      }
+      newSocket.disconnect();
+    };
+  }, [user, eventData, selectedSeats.length]);
 
   // EFFECT 2: Countdown timer
   useEffect(() => {
