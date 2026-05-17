@@ -49,7 +49,7 @@ module.exports = (io) => {
 
         // Handle user leaving the queue/seatmap area
         socket.on('leave_queue', async (eventId, userId) => {
-            await QueueService.removeFromActive(eventId, userId, 'client_leave_queue');
+            await QueueService.removeFromActive(eventId, userId);
         });
 
         socket.on('disconnect', async () => {

@@ -15,32 +15,7 @@ const BATCH_SIZE = 50;
  * Uses Redis Lua Scripts for atomic operations and race condition prevention.
  */
 class QueueService {
-    static _shortUser(userId = '') {
-        return userId.length > 5 ? userId.slice(-5) : userId;
-    }
 
-    static async logQueueState(eventId, reason = 'snapshot') {
-        const activeKey = `active:${eventId}`;
-        const queueKey = `queue:${eventId}`;
-
-        const [activeUsers, queueUsersWithScores] = await Promise.all([
-            redis.smembers(activeKey),
-            redis.zrange(queueKey, 0, -1, 'WITHSCORES')
-        ]);
-
-        const queueUsers = [];
-        for (let i = 0; i < queueUsersWithScores.length; i += 2) {
-            queueUsers.push({
-                userId: queueUsersWithScores[i],
-                score: Number(queueUsersWithScores[i + 1])
-            });
-        }
-
-        console.log(`[Queue][State] event=${eventId} reason=${reason} activeCount=${activeUsers.length} queueCount=${queueUsers.length}`);
-        console.log('[Queue][State] activeUsers=', activeUsers);
-        console.log('[Queue][State] queueUsers=', queueUsers);
-    }
-    
     /**
      * Get the max active users limit from environment variables
      * @returns {number}
@@ -141,11 +116,9 @@ class QueueService {
         if (status === 'GRANTED') {
             console.log(`[Queue] User ${userId.slice(-5)}: GRANTED`);
             const token = await QueueService.generateToken(eventId, userId);
-            await QueueService.logQueueState(eventId, `join_queue_granted:${QueueService._shortUser(userId)}`);
             return { status: 'GRANTED', token };
         } else {
             console.log(`[Queue] User ${userId.slice(-5)}: WAITING (Pos: ${result[1] + 1})`);
-            await QueueService.logQueueState(eventId, `join_queue_waiting:${QueueService._shortUser(userId)}`);
             return { status: 'WAITING', position: result[1] + 1 };
         }
     }
@@ -158,10 +131,6 @@ class QueueService {
         if (!token) {
             token = crypto.randomBytes(16).toString('hex');
             await redis.setex(`booking_token:${eventId}:${userId}`, 300, token);
-            console.log(`[Queue][Token] generated new token for event=${eventId} user=${QueueService._shortUser(userId)} ttl=300s`);
-        } else {
-            const ttl = await redis.ttl(`booking_token:${eventId}:${userId}`);
-            console.log(`[Queue][Token] reused existing token for event=${eventId} user=${QueueService._shortUser(userId)} ttl=${ttl}s`);
         }
         return token;
     }
@@ -170,17 +139,9 @@ class QueueService {
      * Verify if a provided booking token is valid
      */
     static verifyToken = async (eventId, userId, providedToken) => {
-        if (!providedToken) {
-            console.log(`[Queue][Token] verify failed: missing token event=${eventId} user=${QueueService._shortUser(userId)}`);
-            return false;
-        }
+        if (!providedToken) return false;
         const validToken = await redis.get(`booking_token:${eventId}:${userId}`);
-        const isValid = validToken === providedToken;
-        if (!isValid) {
-            const ttl = await redis.ttl(`booking_token:${eventId}:${userId}`);
-            console.log(`[Queue][Token] verify failed: invalid/expired token event=${eventId} user=${QueueService._shortUser(userId)} ttl=${ttl}s`);
-        }
-        return isValid;
+        return validToken === providedToken;
     }
 
     /**
@@ -204,7 +165,6 @@ class QueueService {
                     getIO().to(socketId).emit('queue_passed', { token });
                 }
             }
-            await QueueService.logQueueState(eventId, 'process_queue_batch_promoted');
         }
         getIO().emit('queue_moved', { eventId });
     }
@@ -237,7 +197,7 @@ class QueueService {
                 }
 
                 // Token expired, remove user
-                await QueueService.removeFromActive(eventId, userId, 'token_expired_cleanup');
+                await QueueService.removeFromActive(eventId, userId);
                 
                 removedCount++;
             }
@@ -245,24 +205,19 @@ class QueueService {
         
         if (removedCount > 0) {
             console.log(`[Queue] Removed ${removedCount} users due to token expiration.`);
-            await QueueService.logQueueState(eventId, 'cleanup_expired_tokens_done');
         }
     }
 
     /**
      * Remove user from active set when they leave the seat map
      */
-    static removeFromActive = async (eventId, userId, reason = 'unknown') => {
+    static removeFromActive = async (eventId, userId) => {
         const removed = await redis.srem(`active:${eventId}`, userId);
         await redis.zrem(`queue:${eventId}`, userId);
         await redis.del(`booking_token:${eventId}:${userId}`);
         
         if (removed) {
-            console.log(`[Queue][Leave] event=${eventId} user=${QueueService._shortUser(userId)} reason=${reason} removed=true`);
             getIO().emit('queue_moved', { eventId });
-            await QueueService.logQueueState(eventId, `leave_queue:${reason}`);
-        } else {
-            console.log(`[Queue][Leave] event=${eventId} user=${QueueService._shortUser(userId)} reason=${reason} removed=false (user not in active)`);
         }
     }
 
@@ -272,7 +227,6 @@ class QueueService {
     static checkStatus = async (eventId, userId) => {
         const isMember = await redis.sismember(`active:${eventId}`, userId);
         if (isMember) {
-            console.log(`[Queue][Status] event=${eventId} user=${QueueService._shortUser(userId)} status=GRANTED -> generateToken path`);
             return { status: 'GRANTED', token: await QueueService.generateToken(eventId, userId) };
         }
         const rank = await redis.zrank(`queue:${eventId}`, userId);

@@ -44,7 +44,7 @@ class BookingController {
         if (!isValidToken) throw new ForbiddenError('Booking session expired or invalid. Please queue again.');
 
         const result = await BookingService.checkout({ userId, eventId, seatIds });
-        await QueueService.removeFromActive(eventId, userId, 'checkout_success');
+        await QueueService.removeFromActive(eventId, userId);
 
         new OK({
             message: 'Payment successful. Tickets have been created.',
