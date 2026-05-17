@@ -32,8 +32,15 @@ export default function SeatMap({ eventData }) {
 
     // Register socket to handle unexpected disconnects
     if (user && eventData && eventData.id) {
-      newSocket.emit('register_seatmap', eventData.id, user.id);
+      const token = localStorage.getItem(`booking_token_${eventData.id}`);
+      newSocket.emit('register_seatmap', eventData.id, user.id, token);
     }
+
+    // Listen for token expiration
+    newSocket.on('token_expired', (data) => {
+      alert(data.message || 'Your session has expired.');
+      navigate('/home'); // Redirect out of the seat map
+    });
 
     // 3. Listen for seat lock/unlock events
     newSocket.on('seat_updated', (seatId, isLocking) => {

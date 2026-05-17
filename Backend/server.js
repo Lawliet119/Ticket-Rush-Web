@@ -36,7 +36,7 @@ app.use('', require('./src/routes'))
 // 404 & Error Handling
 app.use((req, res, next) => next(new Error('Not Found')))
 app.use((error, req, res, next) => {
-    const statusCode = error.status || 500
+    const statusCode = error.status || 500  
     return res.status(statusCode).json({
         status: 'error',
         code: statusCode,

@@ -1,7 +1,9 @@
 'use strict'
 
 const BookingService = require('../services/booking.service')
+const QueueService = require('../services/queue.service')
 const { OK } = require('../core/success.response')
+const { ForbiddenError } = require('../core/error.response')
 
 class BookingController {
 
@@ -14,6 +16,10 @@ class BookingController {
     holdSeats = async (req, res, next) => {
         const userId = req.userId;
         const { eventId, seatIds } = req.body;
+        const bookingToken = req.headers['x-booking-token'];
+
+        const isValidToken = await QueueService.verifyToken(eventId, userId, bookingToken);
+        if (!isValidToken) throw new ForbiddenError('Booking session expired or invalid. Please queue again.');
 
         const result = await BookingService.holdSeats({ userId, eventId, seatIds });
 
@@ -32,6 +38,10 @@ class BookingController {
     checkout = async (req, res, next) => {
         const userId = req.userId; 
         const { eventId, seatIds } = req.body;
+        const bookingToken = req.headers['x-booking-token'];
+
+        const isValidToken = await QueueService.verifyToken(eventId, userId, bookingToken);
+        if (!isValidToken) throw new ForbiddenError('Booking session expired or invalid. Please queue again.');
 
         const result = await BookingService.checkout({ userId, eventId, seatIds });
 

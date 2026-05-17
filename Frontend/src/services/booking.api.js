@@ -7,7 +7,10 @@ import http from '../lib/http'
  */
 export const checkoutApi = async (payload) => {
   // payload: { eventId, seatIds }
-  const res = await http.post('/booking/checkout', payload)
+  const token = localStorage.getItem(`booking_token_${payload.eventId}`);
+  const res = await http.post('/booking/checkout', payload, {
+    headers: { 'x-booking-token': token }
+  })
   return res.data
 }
 
@@ -18,7 +21,10 @@ export const checkoutApi = async (payload) => {
  */
 export const holdSeatsApi = async (payload) => {
   // payload: { eventId, seatIds }
-  const res = await http.post('/booking/hold', payload)
+  const token = localStorage.getItem(`booking_token_${payload.eventId}`);
+  const res = await http.post('/booking/hold', payload, {
+    headers: { 'x-booking-token': token }
+  })
   return res.data
 }
 

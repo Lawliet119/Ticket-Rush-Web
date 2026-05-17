@@ -12,7 +12,7 @@ const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const KeyTokenService = require('./keyToken.service')
 const { createTokenPair } = require('../utils/authUtils')
-const { BadRequestError, ConflictRequestError, NotFoundError, AuthFailureError } = require('../core/error.response')
+const { BadRequestError, ConflictRequestError, NotFoundError, AuthFailureError, ForbiddenError } = require('../core/error.response')
 const { validatePassword, validateEmail } = require('../utils/validator')
 const { sendEmail } = require('../utils/mailUtils')
 const { getVerifyEmailTemplate, getForgotPasswordTemplate } = require('../utils/mailTemplates')
@@ -106,7 +106,7 @@ class AccessService {
 
         // CHECK IF USER IS ACTIVE (VERIFIED)
         if (!foundUser.is_active) {
-            throw new AuthFailureError('Please verify your email before logging in')
+            throw new ForbiddenError('Please verify your email before logging in')
         }
 
         const match = await bcrypt.compare(password, foundUser.password_hash)

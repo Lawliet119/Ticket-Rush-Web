@@ -130,9 +130,18 @@ class QueueService {
         let token = await redis.get(`booking_token:${eventId}:${userId}`);
         if (!token) {
             token = crypto.randomBytes(16).toString('hex');
-            await redis.setex(`booking_token:${eventId}:${userId}`, 300, token);
+            await redis.setex(`booking_token:${eventId}:${userId}`, 5, token);
         }
         return token;
+    }
+
+    /**
+     * Verify if a provided booking token is valid
+     */
+    static verifyToken = async (eventId, userId, providedToken) => {
+        if (!providedToken) return false;
+        const validToken = await redis.get(`booking_token:${eventId}:${userId}`);
+        return validToken === providedToken;
     }
 
     /**
@@ -158,6 +167,45 @@ class QueueService {
             }
         }
         getIO().emit('queue_moved', { eventId });
+    }
+
+    /**
+     * Update user socket ID mapping
+     */
+    static updateSocketId = async (eventId, userId, socketId) => {
+        await redis.hset(`socketmap:${eventId}`, userId, socketId);
+    }
+
+    /**
+     * Cleanup users whose tokens have expired
+     */
+    static cleanupExpiredTokens = async (eventId) => {
+        const activeKey = `active:${eventId}`;
+        const socketMapKey = `socketmap:${eventId}`;
+        
+        // Get all active users
+        const activeUsers = await redis.smembers(activeKey);
+        
+        let removedCount = 0;
+        for (const userId of activeUsers) {
+            const tokenExists = await redis.exists(`booking_token:${eventId}:${userId}`);
+            if (!tokenExists) {
+                // Notify user they were kicked out
+                const socketId = await redis.hget(socketMapKey, userId);
+                if (socketId) {
+                    getIO().to(socketId).emit('token_expired', { message: 'Your session has expired.' });
+                }
+
+                // Token expired, remove user
+                await QueueService.removeFromActive(eventId, userId);
+                
+                removedCount++;
+            }
+        }
+        
+        if (removedCount > 0) {
+            console.log(`[Queue] Removed ${removedCount} users due to token expiration.`);
+        }
     }
 
     /**

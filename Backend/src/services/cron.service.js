@@ -35,18 +35,25 @@ class CronService {
         setInterval(async () => {
             try {
                 let cursor = '0';
-                const queueKeys = new Set();
+                const eventIds = new Set();
 
                 // Non-blocking scan to find all active queues
                 do {
                     const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', 'queue:*', 'COUNT', 100);
                     cursor = nextCursor;
-                    keys.forEach(k => queueKeys.add(k));
+                    keys.forEach(k => eventIds.add(k.split(':')[1]));
                 } while (cursor !== '0');
                 
-                const eventIds = Array.from(queueKeys).map(k => k.split(':')[1]);
+                // Also scan active keys because queues might be empty but active users exist
+                cursor = '0';
+                do {
+                    const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', 'active:*', 'COUNT', 100);
+                    cursor = nextCursor;
+                    keys.forEach(k => eventIds.add(k.split(':')[1]));
+                } while (cursor !== '0');
                 
                 for (let eventId of eventIds) {
+                    await QueueService.cleanupExpiredTokens(eventId);
                     await QueueService.processQueue(eventId);
                 }
             } catch (error) {
